@@ -801,7 +801,7 @@
     \item
       instance Applicative Maybe where
       ~~pure = Just
-      ~~Nothing <*> _ = Nothing
+      ~~Nothing <*> \_ = Nothing
       ~~(Just f) <*> something = fmap f something
     \item pure (+3) <*> Just 9
     \item Just (++"hahah") <*> Nothing
@@ -809,7 +809,6 @@
     \item pure (+) <*> Just 3 <*> Just 5
   \end{itemize}
 \end{slide}
-
 
 \subsection{Monoids}
 
@@ -830,7 +829,6 @@
 \end{slide}
 
 \begin{slide}
-  Monoids Continued
   \begin{itemize}
     \item
       instance (Monoid a) => Monoid (Maybe a) where\\
@@ -843,23 +841,45 @@
   \end{itemize}
 \end{slide}
 
-\defverbatim[colored]\code{
-\begin{lstlisting}
-instance (Monoid a) => Monoid (Maybe a) where
-  mempty = Nothing
-
-  mappend Nothing x = x
-  mappend x Nothing = x
-  mappend (Just x) (Just y)
-         = Just (x `mappend` y)
-\end{lstlisting}
-}
+\subsection{Future Topics}
 
 \begin{slide}
-  Monoids Continued
   \begin{itemize}
-    \item
-      \code
+    \item ``newtype'', ``type'', (\$), and Record Syntax
+    \item Numeric Type Heirarchy and ByteStrings
+    \item Monads
+    \item Common Monads (I/O, Reader, Writer, State)
+    \item MonadTransformers and MonadPlus
+    \item Arrows
+    \item Parser Combinators
+    \item Category Theory and Advanced Types
+    \item Advanced Functional Data Structures
+      \begin{itemize}
+        \item Trees as Maps
+        \item Zippers
+        \item Finger Trees (will blow your mind)
+      \end{itemize}
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item Testing/Quickcheck
+    \item Error Handling
+    \item Mutable Objects and Arrays
+    \item Parallel Programming and STM
+    \item Functional Reactive Programming
+    \item Foreign Function Interface
+    \item Cabal and Hackage
+    \item Examine Real Code
+      \begin{itemize}
+        \item XMonad Window Manager (<1000 lines)
+        \item Parsec
+        \item Yesod Web Framework
+        \item Darcs, Version Control System
+        \item The Glorious Glasgow Haskell Compiler
+      \end{itemize}
+    \item Agda Theorem Prover
   \end{itemize}
 \end{slide}
 
@@ -892,6 +912,20 @@ instance (Monoid a) => Monoid (Maybe a) where
       HTML:\\ \url{https://secure.wikimedia.org/wikibooks/en/wiki/Haskell}
     }
 
+  \item Write Yourself a Scheme in 48 Hours
+    \footnote{
+      HTML:\\ \url{http://halogen.note.amherst.edu/~jdtang/scheme_in_48/tutorial/overview.html}
+    }
+
+  \end{itemize}
+\end{slide}
+
+\renewcommand{\thefootnote}{\arabic{footnote}} % numbered footnotes
+\setcounter{footnote}{0}                       % reset footnote numbering
+\begin{slide}
+  \begin{itemize}
+    \normalsize
+
   \item Hackage Package Repository
     \footnote{
       HTML:\\ \url{http://hackage.haskell.org/}
@@ -907,7 +941,26 @@ instance (Monoid a) => Monoid (Maybe a) where
       HTML:\\ \url{http://holumbus.fh-wedel.de/hayoo/hayoo.html}
     }
 
+  \item \#Haskell IRC Channel
+    \footnote{
+      HTML:\\ \url{http://www.haskell.org/haskellwiki/IRC_channel}
+    }
+
   \end{itemize}
 \end{slide}
+
+\titleslide{Thanks}
+\begin{slide}
+  Latex template and tech support:
+  \begin{itemize}
+    \item Daniel ``paradigm'' Thau
+  \end{itemize}
+  For teaching me Haskell and providing some of my examples:
+  \begin{itemize}
+    \item BONUS, Learn You a Haskell
+    \item Bryan O'Sullivan, Don Stewart, and John Goerzen, Real World Haskell
+  \end{itemize}
+\end{slide}
+
 
 \end{document}
