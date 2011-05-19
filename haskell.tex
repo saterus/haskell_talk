@@ -56,10 +56,10 @@
 % \end{frame}
 %
 
-\lstset{                                % listings settings
-	language=[LaTeX]TeX,                % LaTeX by default
+\lstset{                                    % listings settings
+	language=Haskell,                   % LaTeX by default
 	upquote=false,                      % do NOT use "
-	tabsize=4,                          % tabs are 4 spaces
+	tabsize=2,                          % tabs are 4 spaces
 	basicstyle=\ttfamily,               % code is typewriter-style
 	keywordstyle=\color{keywords},      % keywords use keyword color
 	commentstyle=\color{comments}\emph, % comments use comment color
@@ -168,11 +168,11 @@
 %  title block
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-\title{Introduction to Weird Functional Languages with Haskell Edition}    % title
+\title{Introduction to Weird Functional Languages with Haskell}    % title
 \author{
 	Alex ``saterus'' Burkhart\\          % author
-	The Ohio State University\\         % university
-	Open Source Club                    % club
+	The Ohio State University\\          % university
+	Open Source Club                     % club
 }
 \date{2011-05-19}                       % date
 
@@ -285,11 +285,13 @@
 \begin{slide}
   Basic Data Structures
   \begin{itemize}
-    \item Bool, Char, Numbers, List, String
+    \item Bool, Char, Numbers, List, String, Tuples, Functions
     \item True and False
     \item 'a' through 'z' and more
-    \item Ratios and Arbitrary Sized
-    \item \code [1, 2, 3]
+    \item Ratios and Arbitrary Size Numbers
+    \item{}{} [1, 2, 3]
+    \item (1, 3)
+    \item (+), sum
   \end{itemize}
 \end{slide}
 
@@ -297,9 +299,11 @@
   Function Signatures
   \begin{itemize}
     \item 12 :: Int
-    \item \code [1, 2, 3] :: [Integer]
+    \item{}{} [1, 2, 3] :: [Integer]
+    \item{}{} ['f', 'o', 'o'] :: String
+    \item (1, 3) :: (Int, Int)
+    \item (+) :: Int -> Int -> Int
     \item sum :: [Integer] -> Integer
-    \item \code ['f', 'o', 'o'] :: String
   \end{itemize}
 \end{slide}
 
@@ -311,6 +315,7 @@
     \item data Color = Red | Green | Blue
     \item data TrafficLight = Light String String Color
     \item data Maybe a = Nothing | Just a
+    \item data Either a b = Left a | Right b
   \end{itemize}
 \end{slide}
 
@@ -318,7 +323,7 @@
   Function Definitions
   \begin{itemize}
     \item
-      \code
+
       even :: Integer -> Integer -> Bool\\
       even x = (mod x 2) == 0
     \item
@@ -330,12 +335,13 @@
 \end{slide}
 
 \subsection{Typeclasses}
+
 \begin{slide}
   The Problem
   \begin{itemize}
     \item Function Scope
     \item Equality for the Color type\\
-      \code
+
       (==) :: Color -> Color -> Bool\\
       (==) colorA colorB = ...
   \end{itemize}
@@ -346,18 +352,18 @@
   \begin{itemize}
     \item Ad-hoc polymorphic interfaces
     \item
-      \code
-      class Eq a where\\
-      (==) :: a -> a -> Bool\\
-      (/=) :: a -> a -> Bool
-    \item
-      \code
-      instance Eq Color where\\
-        (==) :: Color -> Color -> Bool\\
-        (==) a b = ...
 
-        (/=) :: Color -> Color -> Bool\\
-        (/=) a b = not (a == b)
+      class Eq a where\\
+      ~~(==) :: a -> a -> Bool\\
+      ~~(/=) :: a -> a -> Bool
+    \item
+
+      instance Eq Color where\\
+      ~~(==) :: Color -> Color -> Bool\\
+      ~~(==) a b = ...
+
+      ~~(/=) :: Color -> Color -> Bool\\
+      ~~(/=) a b = not (a == b)
   \end{itemize}
 \end{slide}
 
@@ -366,9 +372,9 @@
   \begin{itemize}
     \item Typeclass Deriving
     \item
-      \code
+
       data Color = Red | Green | Blue\\
-      deriving (Eq, Show, Read)
+      ~~deriving (Eq, Show, Read)
     \item Automatically derive instances of Read, Show, Bounded, Enum, Eq, and Ord.
   \end{itemize}
 \end{slide}
@@ -377,13 +383,14 @@
   Function Signatures Updated
   \begin{itemize}
     \item 12 :: (Num a) => a
-    \item \code [1,2,3] :: (Num a) => [a]
+    \item{} [1,2,3] :: (Num a) => [a]
     \item even :: Integral a => a -> a -> Bool
     \item sort :: (Ord a) => [a] -> [a]
   \end{itemize}
 \end{slide}
 
 \subsection{Pattern Matching}
+
 \begin{slide}
   Avoid lot's of manual == comparisons
   \begin{itemize}
@@ -394,7 +401,6 @@
 \end{slide}
 
 \begin{slide}
-  Avoid lot's of manual == comparisons
   \begin{itemize}
     \item data Color = Red | Green | Blue
       \item
@@ -406,7 +412,6 @@
 \end{slide}
 
 \begin{slide}
-  Avoid lot's of manual == comparisons
   \begin{itemize}
     \item data Color = Red | Green | Blue
     \item
@@ -456,8 +461,8 @@
     \item val2 = Nothing
     \item possiblyDouble :: Maybe Int -> Maybe Int\\
       possibleDouble x = case x of\\
-      Nothing -> Nothing\\
-      (Just x) -> x + x
+      ~~~~Nothing -> Nothing\\
+      ~~~~(Just x) -> x + x
   \end{itemize}
 \end{slide}
 
@@ -473,9 +478,11 @@
   \end{itemize}
 \end{slide}
 
-\subsection{Think Functionally}
+\titleslide{Think Functionally}
+
+\subsection{Recursion with Lists}
+
 \begin{slide}
-  Recusion with Lists
   \begin{itemize}
     \item myList = [1,2,3,4,5]
     \item sum :: [Int] -> Int -> Int\\
@@ -484,8 +491,9 @@
   \end{itemize}
 \end{slide}
 
+\subsection{Functions as Arguments}
+
 \begin{slide}
-  Functions as Arguments
   \begin{itemize}
     \item myList = [1,2,3,4,5]
     \item double :: Int -> Int
@@ -494,7 +502,6 @@
 \end{slide}
 
 \begin{slide}
-  Functions as Arguments
   \begin{itemize}
     \item example = ``things''
     \item toUpper :: Char -> Char
@@ -503,7 +510,6 @@
 \end{slide}
 
 \begin{slide}
-  Functions as Arguments
   \begin{itemize}
     \item myList = [1,2,3,4,5]
     \item foldl :: (a -> b -> a) -> a -> [b] -> a
@@ -511,8 +517,9 @@
   \end{itemize}
 \end{slide}
 
+\subsection{Higher Order Functions}
+
 \begin{slide}
-  Higher Order Functions
   \begin{itemize}
     \item map :: (a -> b) -> [a] -> [b]
     \item filter :: (a -> Bool) -> [a] -> [a]
@@ -526,17 +533,19 @@
   \end{itemize}
 \end{slide}
 
+\subsection{Lambdas}
+
 \begin{slide}
-  Lambdas
   \begin{itemize}
     \item myList = [1,2,3,4,5]
-    \item triple = map (\x -> x + x + x) myList
-    \item divisibleThree = filter (\x -> (mod x 3) == 0) myList
+    \item triple = map (\textbackslash x -> x + x + x) myList
+    \item divisThree = filter (\textbackslash x -> (mod x 3) == 0) myList
   \end{itemize}
 \end{slide}
 
+\subsection{Currying}
+
 \begin{slide}
-  Currying
   \begin{itemize}
     \item
       ghci> :t (+)\\
@@ -549,13 +558,311 @@
   \end{itemize}
 \end{slide}
 
+\subsection{Flip}
 \begin{slide}
-  Flip
   \begin{itemize}
     \item flip :: (a -> b -> c) -> b -> a -> c
-    \item
+    \item flip f x y = f y x
   \end{itemize}
 \end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item myDiv :: Fractional a => a -> a -> a
+    \item myDiv x y = x / y
+    \item myDiv 3 12\\
+      => ?
+    \item myDiv 36 12\\
+      => ?
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item flip :: (a -> b -> c) -> b -> a -> c
+    \item myDiv :: Fractional a => a -> a -> a
+    \item ghci> :t flip myDiv\\
+      => ?
+    \item flip myDiv 3 12\\
+      => ?
+    \item flip myDiv 36 12\\
+      => ?
+  \end{itemize}
+\end{slide}
+
+\subsection{Function Composition}
+
+\begin{slide}
+  \begin{itemize}
+    \item \((f \circ g)(x) \equiv f(g(x))\) -- math, not Haskell
+    \item (.) :: (b -> c) -> (a -> b) -> a -> c
+    \item f . g = \textbackslash x -> f (g x)
+    \item{}{}
+      map (\textbackslash x -> negate (abs x)) [5,-3,-6,7,-3,2,-19]\\
+      => [-5,-3,-6,-7,-3,-2,-19]
+    \item{}{}
+      map (negate . abs) [5,-3,-6,7,-3,2,-19]\\
+      => [-5,-3,-6,-7,-3,-2,-19]
+  \end{itemize}
+\end{slide}
+
+\subsection{Laziness}
+
+\begin{slide}
+  Delayed Computation Until Necessary
+  \begin{itemize}
+    \item Programs are Transformations of Data
+    \item Infinite Data Structures
+    \item Interesting Compiler Optimizations
+    \item ``undefined''
+    \item Circular Structures
+    \item Unique to Haskell
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Infinite Data Structures
+  \begin{itemize}
+    \item Haskell Ranges
+    \item  [1..] :: (Num t) => [t]
+    \item take 5 [1..]
+    \item length [1..] -- Bad Idea
+    \item fac 0 = 1\\
+      fac n = n * fac (n - 1)
+    \item fib = 0 : 1 : zipWith (+) fib (tail fib)
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Short cut Fusion
+  \begin{itemize}
+    \item map f (map g someList)\\
+      => map (f . g) someList
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  undefined
+  \begin{itemize}
+    \item Valid as long as unevaluated
+    \item Stub out function signatures
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Circular Structures
+  \begin{itemize}
+    \item No mutable references
+    \item data Foo = Bar a Foo
+    \item
+      circularFoo :: Foo Int\\
+      circularFoo = x\\
+        ~~~~where x = Bar 1 y\\
+        ~~~~~~~~~~~~y = Bar 2 x
+      \item Sci-Fi-Explanation: ``You can borrow things from the future as long as you don't try to change them''
+  \end{itemize}
+\end{slide}
+
+
+\titleslide{Custom Data Structures}
+\subsection{List}
+
+\begin{slide}
+  \begin{itemize}
+    \item data List a = Nil | Cons a (List a)
+    \item
+      head :: List a -> Maybe a\\
+      head Nil        = Nothing\\
+      head (Cons x \_) = Just x
+    \item
+      map :: (a -> b) -> List a -> List b\\
+      map \_ Nil        = Nil\\
+      map f (Cons x xs) = Cons (f x) (map f xs)
+  \end{itemize}
+\end{slide}
+
+\subsection{Binary Tree}
+\begin{slide}
+  \begin{itemize}
+    \item data Tree a = Leaf a | Node (Tree a) (Tree a)
+    \item testTree = Node (Node (Leaf 2) (Node (Node (Leaf 12) (Leaf 7)) (Leaf 3))) (Leaf 9)
+    \item
+      tMap :: (a -> b) -> Tree a -> Tree b\\
+      tMap f (Leaf x)   = Leaf (f x)\\
+      tMap f (Node l r) = Node (tMap f l) (tMap f r)
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      tFilter :: (a -> Bool) -> Tree a -> [a]\\
+      tFilter f (Leaf x)\\
+      ~~~~| f x = [x]\\
+      ~~~~| otherwise = []\\
+      tFilter f (Node l r) = (tFilter f l) ++ (tFilter f l)
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      tFoldDf :: (a -> b -> a) -> a -> Tree b -> a\\
+      tFoldDf f acc (Leaf x)   = f acc x\\
+      tFoldDf f acc (Node l r) = tFoldDf f (tFoldDf f acc l) r
+    \item treeMax t = tFoldDf max 0 t
+    \item treeMin t = tFoldDf min 0 t
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      member :: (Eq a) => Tree a -> a -> Maybe a\\
+      member t e = tFoldDf member' Nothing t\\
+      ~~where member' acc x\\
+      ~~~~~~| x == e    = Just x\\
+      ~~~~~~| otherwise = acc
+
+  \end{itemize}
+\end{slide}
+
+\titleslide{Common Patterns}
+\subsection{Functors}
+
+\begin{slide}
+  \begin{itemize}
+    \item map :: (a -> b) -> [a] -> [b]
+    \item lmap :: (a -> b) -> List a -> List b
+    \item tMap :: (a -> b) -> Tree a -> Tree b
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      class Functor a where\\
+      ~~fmap :: Functor f => (a -> b) -> f a -> f b
+    \item
+      instance Functor [a] where\\
+      ~~fmap :: (a -> b) -> [a] -> [b]\\
+      ~~fmap = map
+    \item
+      instance Functor (Tree a) where\\
+      ~~fmap :: (a -> b) -> Tree a -> Tree b\\
+      ~~fmap = tMap
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      class Functor a where\\
+      ~~fmap :: Functor f => (a -> b) -> f a -> f b
+    \item
+      instance Functor Maybe where\\
+      ~~fmap :: (a -> b) -> Maybe a -> Maybe b\\
+      ~~fmap \_ Nothing = Nothing\\
+      ~~fmap f Just x = Just (f x)
+    \item possiblyDouble m = fmap double m\\
+      ~~~~where double x = x + x
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item Recall Currying...
+    \item plusX m = fmap plux m\\
+      ~~~~where plux x = (+ x)
+    \item uh oh...
+    \item ghci> :t plusX [1,2,3,4,5]\\
+      plusX [1,2,3,4,5] :: Num a => [a -> a]
+  \end{itemize}
+\end{slide}
+
+\subsection{Applicative Functors}
+
+\begin{slide}
+  \begin{itemize}
+    \item ghci> :t plusX [1,2,3,4,5]\\
+      plusX [1,2,3,4,5] :: Num a => [a -> a]
+    \item fmap again?
+    \item
+      class (Functor f) => Applicative f where
+      ~~pure :: a -> f a
+      ~~(<*>) :: f (a -> b) -> f a -> f b
+    \item
+      plusX [1,2,3,4] <*> [10]
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      instance Applicative Maybe where
+      ~~pure = Just
+      ~~Nothing <*> _ = Nothing
+      ~~(Just f) <*> something = fmap f something
+    \item pure (+3) <*> Just 9
+    \item Just (++"hahah") <*> Nothing
+    \item Nothing <*> Just "woot"
+    \item pure (+) <*> Just 3 <*> Just 5
+  \end{itemize}
+\end{slide}
+
+
+\subsection{Monoids}
+
+\begin{slide}
+  Monoids
+  \begin{itemize}
+    \item
+      class Monoid a where\\
+      ~~mempty :: Monoid a => a\\
+      ~~mappend :: Monoid a => a -> a -> a\\
+      ~~mconcat :: Monoid a => [a] -> a
+    \item
+      instance Monoid [a] where\\
+      ~~mempty = []\\
+      ~~mappend = (++)\\
+      ~~mconcat = foldr mappend mempty
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Monoids Continued
+  \begin{itemize}
+    \item
+      instance (Monoid a) => Monoid (Maybe a) where\\
+      ~~mempty = Nothing
+
+      ~~mappend Nothing x = x\\
+      ~~mappend x Nothing = x\\
+      ~~mappend (Just x) (Just y)\\
+      ~~~~~~= Just (x \`{}mappend\`{} y)
+  \end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+instance (Monoid a) => Monoid (Maybe a) where
+  mempty = Nothing
+
+  mappend Nothing x = x
+  mappend x Nothing = x
+  mappend (Just x) (Just y)
+         = Just (x `mappend` y)
+\end{lstlisting}
+}
+
+\begin{slide}
+  Monoids Continued
+  \begin{itemize}
+    \item
+      \code
+  \end{itemize}
+\end{slide}
+
 
 
 
@@ -567,51 +874,40 @@
 \setcounter{footnote}{0}                       % reset footnote numbering
 \titleslide{Where to go to Learn More}
 \begin{slide}
-	\begin{itemize}
-		\normalsize
-		\item Wikibooks
-		\footnote{
-			HTML:\\ \url{https://secure.wikimedia.org/wikibooks/en/wiki/LaTeX}
-		}
-		\footnote{
-			PDF:\\ \url{http://upload.wikimedia.org/wikipedia/commons/2/2d/LaTeX.pdf}
-		}
-		\item The Not So Short Introduction to \LaTeXe
-		\footnote{
-			PDF:\\ \url{http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf}
-		}
-		\item \mediatitle{The \TeX book} by Donald E. Knuth (Plain \TeX)
-		\footnote{
-		 	\TeX:\\
-			\url{http://tex.loria.fr/general/texbook.tex}
-		}
-		\footnote{
-		 \$32.20:
-			\url{http://www.amazon.com/TeXbook-Donald-Knuth/dp/0201134489}
-		}
-		\item \mediatitle{\LaTeX: A Document Preparation System} by Leslie Lamport
-		\footnote{
-		 \$29.99:
-			\url{http://www.amazon.com/LaTeX-Document-Preparation-System-2nd/dp/0201529831}
-		}
-		\item \mediatitle{The \LaTeX\ Companion}
-		\footnote{
-		 \$54.56:
-			\url{http://www.amazon.com/gp/product/0201362996}
-		}
-	\end{itemize}
+  \begin{itemize}
+    \normalsize
+
+  \item Learn You a Haskell for Great Good!
+    \footnote{
+      HTML:\\ \url{http://learnyouahaskell.com/}
+    }
+
+  \item Real World Haskell
+    \footnote{
+      HTML:\\ \url{http://book.realworldhaskell.org/}
+    }
+
+  \item Haskell Wikibook
+    \footnote{
+      HTML:\\ \url{https://secure.wikimedia.org/wikibooks/en/wiki/Haskell}
+    }
+
+  \item Hackage Package Repository
+    \footnote{
+      HTML:\\ \url{http://hackage.haskell.org/}
+    }
+
+  \item Hoogle API Search
+    \footnote{
+      HTML:\\ \url{http://haskell.org/hoogle/}
+    }
+
+  \item Hayoo API Search
+    \footnote{
+      HTML:\\ \url{http://holumbus.fh-wedel.de/hayoo/hayoo.html}
+    }
+
+  \end{itemize}
 \end{slide}
 
 \end{document}
-\section{\LaTeX\ gotchas}
-\section{Where to go from here}
-
-latex   - 219
-tex     - 5
-context - 9
-
-Beamer user guide - 240p
-pgf/tikz manual -
-
-
-\definecolor{item}{RGB}{253,198,137}     % item color, pastel peach
