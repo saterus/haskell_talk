@@ -54,7 +54,9 @@ Pattern Matching
 - Maybe, Lists
 - Case
 - Guards
-Functional Programming
+
+
+Functions
 - Recursion
 - Currying
     ghci> :t (+)
@@ -63,6 +65,8 @@ Functional Programming
     (+ 1) :: Num a => a -> a
 - First Class Functions
 - map, foldl, foldr, any, all
+
+
 Advanced Data Structures (persistent)
  - Parallelism Wins
 
