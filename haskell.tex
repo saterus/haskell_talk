@@ -1,0 +1,1234 @@
+% =============================================================================
+%  saterus's slides for a presentation on Haskell
+% =============================================================================
+
+\documentclass{beamer}                  % beamer class, good for slides
+\usepackage[T1]{fontenc}                % use a modern scalable font
+\usepackage{lmodern}                    % Latin Modern font
+\usepackage[T1]{tipa}                   % pronunciation symbols
+\usepackage{graphicx}                   % include pictures
+\usepackage{xifthen}                    % \ifthenelse
+\usepackage{framed}                     % framed environment
+\usepackage{cancel}                     % \cancel in math
+\usepackage{varioref}                   % \vpageref cross referencing
+\usepackage{listings}                   % code formatting
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  Theming
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% going for a simple, pastel look here
+%
+
+\usetheme{default}                       % default beamer theme (clean, empty)
+\beamertemplatenavigationsymbolsempty    % remove nav symbols
+
+\definecolor{fore}{RGB}{249,242,215}     % foreground color, off-white
+\definecolor{back}{RGB}{51,51,51}        % background color, gray
+\definecolor{title}{RGB}{96,148,219}     % title color, pastel blue
+\definecolor{keywords}{RGB}{255,0,90}    % code keyword color, pastel pink
+\definecolor{comments}{RGB}{0,179,113}   % code comment color, pastel green
+\definecolor{item}{RGB}{96,148,219}      % title color, pastel blue
+
+\setbeamercolor{titlelike}{fg=title}          % titles use title color
+\setbeamercolor{normal text}{fg=fore,bg=back} % text is fore on back
+\setbeamercolor{block title}{fg=comments}     % block titles are comment color
+\setbeamercolor{section in toc}{fg=comments}  % toc uses title color
+\setbeamercolor{item}{fg=item}                % itemize symbol color
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  code listing
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% beamer and listings don't play super well together
+% best to define code *outside* of a frame and then call it, like so:
+%
+% \defverbatim[colored]\code{           % define code out of frame
+% \begin{lstlisting}
+%  -- code goes here --
+% \end{lstlisting}
+% } % end of stored code
+%
+% \begin{frame}
+% \frametitle{title}
+% \code % call code in frame
+% \end{frame}
+%
+
+\lstset{                                % listings settings
+	language=[LaTeX]TeX,                % LaTeX by default
+	upquote=false,                      % do NOT use "
+	tabsize=4,                          % tabs are 4 spaces
+	basicstyle=\ttfamily,               % code is typewriter-style
+	keywordstyle=\color{keywords},      % keywords use keyword color
+	commentstyle=\color{comments}\emph, % comments use comment color
+}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  section slide command
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% new command to draw a simple line.  it will be as long as available,
+% and 1pt wide
+%
+
+\newcommand{\srule}{
+	\rule{\textwidth}{1pt}\\
+}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  custom slide environment
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% essentially frame, but automatically adds section and possibly subsection as
+% title.  also increases default font size
+%
+% method to detect subsection presence is kind of hacky:
+% find it's width. if it has any width, it exists.
+%
+
+% variable to hold subsection's width
+\newlength{\subsecwidth}
+
+% slide environment - frame, plus automatic title
+\newenvironment{slide}{
+	\begin{frame} % frame
+	\settowidth{\subsecwidth}{\insertsubsection} % find subsection width
+	\ifthenelse{\dimtest{\subsecwidth}{<}{1pt}}{ % no subsection
+		\frametitle{\insertsection\\             % insert *just* section
+		\vspace{-1ex}                            % move next line up a bit
+		\color{fore}\srule                       % pretty line
+		\par                                     % remove excess spacing
+		\vspace{-3ex}                            % remove excess spacing
+		}
+	}{                                           % subsection exists
+		\frametitle{\insertsection\ -- \insertsubsection\\ % sec - subsec
+		\vspace{-1ex}                            % move next line up a bit
+		\color{fore}\srule                       % pretty line
+		\par                                     % remove excess spacing
+		\vspace{-3ex}                            % remove excess spacing
+		}
+	}
+	\Large                                       % make font in slide Large
+}{
+	\end{frame}
+}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  code result environment
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% code is often paired with there result, but has to be entered outside of
+% frame.  use code from outside frame (\code), paired with result
+%
+
+\newenvironment{coderesult}{
+	\begin{block}{Code}      % block, called Code
+		\code                % print \code
+	\end{block}
+	\begin{block}{Result}    % block, called Result
+}{                           % result argument is here
+	\end{block}
+}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  section slide command
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%
+% simple command to both set the section and display a lone frame indicating
+% the new section
+%
+
+\newcommand{\titleslide}[1]{
+	\section{#1}             % set the section based on argument
+	\begin{slide}
+		\begin{center}
+			\color{comments}
+			\Huge            % Huge font size
+			#1               % print new section's title
+		\end{center}
+	\end{slide}
+}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  formatting commands
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\newcommand{\mediatitle}[1]{\textit{#1}}  % media titles should be italicized
+\newcommand{\forlang}[1]{\textit{#1}}     % foreign languages should be ital
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  formatting commands
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}} % fancy symbols for footnotes
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  title block
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\title{Introduction to Weird Functional Languages with Haskell Edition}    % title
+\author{
+	Alex ``saterus'' Burkhart\\          % author
+	The Ohio State University\\         % university
+	Open Source Club                    % club
+}
+\date{2011-05-19}                       % date
+
+% =============================================================================
+%  actual document begins here
+% =============================================================================
+
+\begin{document}                        % settings end, content begins
+
+\begin{frame}                           % title slide
+	\srule                              % pretty line
+	\titlepage                          % title page (title, author, date)
+	\srule                              % pretty line
+\end{frame}
+
+\begin{frame}                           % Table of contents slide
+	\begin{center}
+		\srule                          % pretty line
+		\vspace{1ex}
+		\color{title} \inserttitle\\\color{fore} Table of Contents
+		\srule                          % pretty line
+	\end{center}
+	\begin{columns}                     % break into two columns
+		\begin{column}{.5\textwidth}    % first column, 1/2 page width
+			\tableofcontents[sections={1-3}] % first three sections of ToC
+		\end{column}
+		\begin{column}{.5\textwidth}    % second column, 1/2 page width
+			\tableofcontents[sections={4-6}] % last three sections of ToC
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  Intro to FP
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\titleslide{Functional Programming}
+
+\subsection{The Functional Paradigm}
+\begin{slide}
+  \begin{itemize}
+    \item Declarative
+    \item First Class Functions
+    \item Pure Functions
+    \item Immutibility
+    \item Parallelism
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Declarative
+  \begin{itemize}
+    \item ``What'' instead of ``How''
+    \item Smart Compilers
+    \item Safety and Correctness
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  First Class Functions
+  \begin{itemize}
+    \item Functions as Data Structures
+    \item Use Functions as Arguments to Other Functions
+    \item Abstract Common Patterns
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Pure Functions
+  \begin{itemize}
+    \item No I/O or Modification of State
+    \item Consistent, Predictible Results
+    \item Safety
+    \item Optimization
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Immutability
+  \begin{itemize}
+    \item Can't Change Data
+    \item Immutable Structures can be Shared
+    \item Reusing List Links
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Parallelism
+  \begin{itemize}
+    \item Locks Unnecessary
+    \item Order of Execution negotiated by Compiler
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Extra Stuff
+  \begin{itemize}
+    \item Code Generation with Lisp
+    \item Type Safety with Haskell and OCaml
+    \item Massive Paralellism with Erlang
+    \item Haskell, Erlang, OCaml are all \textit{fast}
+  \end{itemize}
+\end{slide}
+
+
+\titleslide{Haskell}
+
+\subsection{Basic Syntax}
+
+\begin{slide}
+  Basic Data Structures
+  \begin{itemize}
+    \item Bool, Char, Numbers, List, String
+    \item True and False
+    \item 'a' through 'z' and more
+    \item Ratios and Arbitrary Sized
+    \item \code [1, 2, 3]
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Function Signatures
+  \begin{itemize}
+    \item 12 :: Int
+    \item \code [1, 2, 3] :: [Integer]
+    \item sum :: [Integer] -> Integer
+    \item \code ['f', 'o', 'o'] :: String
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Algebraic Data Types
+  \begin{itemize}
+    \item data Bool = True | False
+    \item data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
+    \item data Color = Red | Green | Blue
+    \item data TrafficLight = Light String String Color
+    \item data Maybe a = Nothing | Just a
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Function Definitions
+  \begin{itemize}
+    \item
+      \code
+      even :: Integer -> Integer -> Bool\\
+      even x = (mod x 2) == 0
+    \item
+      odd :: Integer -> Integer -> Bool\\
+      odd x = not (even x)
+    \item
+      doubleMe x = x + x
+  \end{itemize}
+\end{slide}
+
+\subsection{Typeclasses}
+\begin{slide}
+  The Problem
+  \begin{itemize}
+    \item Function Scope
+    \item Equality for the Color type\\
+      \code
+      (==) :: Color -> Color -> Bool\\
+      (==) colorA colorB = ...
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  The Solution
+  \begin{itemize}
+    \item Ad-hoc polymorphic interfaces
+    \item
+      \code
+      class Eq a where\\
+      (==) :: a -> a -> Bool\\
+      (/=) :: a -> a -> Bool
+    \item
+      \code
+      instance Eq Color where\\
+        (==) :: Color -> Color -> Bool\\
+        (==) a b = ...
+
+        (/=) :: Color -> Color -> Bool\\
+        (/=) a b = not (a == b)
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  The Win
+  \begin{itemize}
+    \item Typeclass Deriving
+    \item
+      \code
+      data Color = Red | Green | Blue\\
+      deriving (Eq, Show, Read)
+
+  \end{itemize}
+\end{slide}
+
+
+
+
+
+
+\begin{slide}
+	\mediatitle{The Art of Computer Programming} (First edition)
+	\begin{itemize}
+		\item Published in 1969
+		\item Used ``Monotype technology'' for typesetting
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	\mediatitle{The Art of Computer Programming} (Second edition)
+	\begin{itemize}
+		\item Published in 1976
+		\item ``Monotype'' no longer available
+		\item Original fonts no longer available
+		\item Knuth disapproved of gallery proofs
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	``I'll go build my \textbf{own} theme park!  With blackjack!
+	And hookers!''\\
+	\bigskip      % some vertical space
+	\hspace{1em}  % small indentation
+	--- Bender, \mediatitle{Futurama}
+\end{slide}
+
+\subsection{\TeX} % - - - TeX specifics - - -
+\begin{slide}
+	\TeX~\textipa{/'tEx/} or \textipa{/'tEk/} was developed for over a decade,
+	finalized in 1989 \label{ipa2}
+	\begin{itemize}
+		\item All changes since are bug fixes, no new features
+		\item Bug fix version approaches $\pi$
+		\begin{itemize}
+			\item Current version is 3.1415926
+		\end{itemize}
+		\item Also finalized METAFONT in same year
+		\begin{itemize}
+			\item Version approaches $e$
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	\TeX\ is a Turing-complete language
+	\begin{itemize}
+		\item If-then-else
+		\item Variables
+		\item Loops
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	\TeX\ uses a lot of neat algorithms
+	\begin{itemize}
+		\item Mathematical spacing
+		\item Justification
+		\item Hyphenation/line breaking
+		\begin{itemize}
+			\item Adopted by Adobe InDesign
+			\item Adopted by GNU fmt
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\subsection{\TeX\ Macro Packages} % - - - TeX Macro Packages - - -
+\begin{slide}
+	\TeX\ is very low level, not practical by itself
+	\begin{itemize}
+		\item Knuth created a macro package over \TeX\ called Plain~\TeX
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	AMS-\TeX
+	\begin{itemize}
+		\item Created by American Mathematical Society
+		\item Made math formatting easier
+		\item Largely abandoned for \LaTeX\ with AMS packages
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	\LaTeX\ \textipa{/'le\;ItEk/}, \textipa{/'le\;ItEx/}, \textipa{/'la:tEx/},
+	\textipa{/'la:tEk/} \label{ipa3}
+	\begin{itemize}
+		\item Created by Leslie Lamport
+		\item Author focus on content, let \LaTeX\ worry about presentation
+		\item By far the most popular flavor of \TeX\ today
+		\item Development largely stalled
+		\begin{itemize}
+			\item Latest stable is \LaTeXe
+			\item \LaTeX3 has been in development for longer than Duke Nukem
+			Forever
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	Con\TeX t
+	\begin{itemize}
+		\item created by Hans Hagen
+		\item easy and consistent access to advanced typographical control
+		\item still in active development
+		\begin{itemize}
+			\item latest release was six months ago
+			\item moved to git in 2009
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  Is LaTeX right for you?
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\titleslide{Is \LaTeX\ right for you?}
+
+\subsection{The Test} % - - - The Test - - -
+
+\begin{slide}
+	\begin{center}
+		Which is the proper lowercase delta?\\
+		\vspace{1em}
+%		\includegraphics{del1.png}
+		\hspace{2cm}
+%		\includegraphics{del2.png}\\
+	\end{center}
+\end{slide}
+
+\begin{slide}
+	``I don't know and I don't care.''
+	\begin{itemize}
+		\item<2-> \LaTeX\ probably isn't for you.  Stick with your word
+		processor.
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	``I don't care what the next slide says, \textit{that} one is correct.''
+	\begin{itemize}
+		\item<2-> \LaTeX\ probably isn't for you, but Plain~\TeX\ or Con\TeX t
+		may be a good fit.
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	``I don't know but I'd like to use whichever is correct.''
+	\begin{itemize}
+		\item<2-> \LaTeX\ may be worth your time.
+	\end{itemize}
+\end{slide}
+
+\subsection{Other \LaTeX\ strengths} % - - - Other LaTeX strengths- - -
+
+\begin{slide}
+	\LaTeX\ typesets mathematics very well
+	\begin{align*}
+		|x|=
+		\begin{cases}
+			x & \text{for } x\geq 0\\
+			-x & \text{for } x < 0
+		\end{cases}
+	\end{align*}
+	\begin{align*}
+		\begin{bmatrix}
+			3 & 1\\
+			-2 & 5
+		\end{bmatrix}
+		\begin{bmatrix}
+			6 & 2\\
+			1 & 9
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+			19 & 15\\
+			-7 & 41
+		\end{bmatrix}
+	\end{align*}
+	\begin{align*}
+		\frac{
+			2x+xy+y+2
+		}{
+			x+1
+		}
+		=
+		\frac{
+			\cancel{(x+1)}(y+2)
+		}{
+			\cancel{x+1}
+		}
+		= \boxed{y+2}
+	\end{align*}
+\end{slide}
+
+\begin{slide}
+	\small
+	Given the equation
+	\begin{align} \label{1stnonlin}
+		\frac{\mathrm{d}y}{\mathrm{d}t}+p(t)y=q(t)
+	\end{align}
+	Find the integrating factor
+	\begin{align} \label{mu}
+		\mu(t)=e^{\int p(t)\mathrm{d}t}
+	\end{align}
+	And multiply the equation \eqref{1stnonlin} by the integrating factor
+	\eqref{mu}
+	\begin{align*}
+		\mu\left[
+			\frac{\mathrm{d}y}{\mathrm{d}t}+p(t)y
+		\right]
+		&=\mu q(t)
+		\\
+		\frac{\mathrm{d}}{\mathrm{d}t}\left[
+			\mu y
+		\right]
+		&=\mu q(t) \tag{product rule}
+		\\
+		\mu y&=\int \mu q(t) \mathrm{d}t
+		\\
+		y&=
+		\boxed
+		{\frac{
+			\int \mu q(t)\mathrm{d}t
+		}{ \mu }}
+	\end{align*}
+\end{slide}
+
+\begin{slide}
+	\begin{itemize}
+		\item Bibliography management / citations (Bib\TeX)
+		\item Automation of many useful things
+		\begin{itemize}
+			\item Table of Contents
+			\item Indices / Appendices
+			\begin{itemize}
+				\item List of Figures
+				\item List of Definitions
+			\end{itemize}
+		\end{itemize}
+		\item Easy access to many symbols
+		\begin{itemize}
+			\item International Phonetic Alphabet
+			\footnote{See sections ``\nameref{ipa1}'', ``\nameref{ipa2}'',
+			and ``\nameref{ipa3}''}
+			\item Random math symbols ($\partial$, $\int$, $\infty$)
+			\item Comprehensive list of symbols:
+			\url{http://www.ctan.org/tex-archive/info/symbols/comprehensive/symbols-a4.pdf}
+		\end{itemize}
+		\item Great cross referencing\label{cross}
+		\item Absolutely wonderful documentation
+	\end{itemize}
+\end{slide}
+
+\subsection{Disclaimer} % - - - Disclaimer - - -
+
+\begin{slide}
+	Disclaimer:
+	\begin{itemize}
+		\item \LaTeX\ can be moody, temperamental and sometimes just plain
+		weird.  While the general concept isn't hard, it can throw curve balls
+		at you quite a lot.  It may not be worth the time for everyone, even if
+		you gave the third answer.
+		\item However, if you do learn all the weird kinks---or just don't do
+		stuff that requires them---\LaTeX\ will hand you beautiful,
+		professional-looking documents.
+		\footnote{Along with other benefits, explained \vpageref{cross}.}
+	\end{itemize}
+\end{slide}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  LaTeX Philosophy
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\titleslide{\LaTeX\ Philosophy}
+
+\begin{slide}
+	\LaTeX\ Philosophy
+	\begin{itemize}
+		\item Where possible, let a typesetting professional decide visual
+		presentation --- let the author focus on the content.
+		\item There should be a clear separation between the logical structure
+		of a document and the visual presentation of the document.
+	\end{itemize}
+\end{slide}
+
+\subsection{\LaTeX\ is the Typesetter}
+\begin{slide}
+	How should you format a section heading?
+	\begin{itemize}
+		\item<2> Left-justified?  Centered?  Right-justified?
+		\item<2> Italicized?  Bolded?  Slanted?  Underlined?
+		\item<2> Monospaced font?  Proportional font?
+		\item<2> Same size as body font?  Larger?  How much?
+		\item<2> Numbered?  Place above? Place left?
+		\item<2> Does the number go between parentheses?  Just a right
+		parenthesis?  Maybe a dot?  A colon?
+		\item<2> Roman numeral?  Alphabetic?  Arabic numeral?
+		\item<2> Does the section number get reset each chapter?
+		\item<2> What if I'm just writing a short article?  What if it's a longer
+		report?  What if it's a full book?
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	\begin{center}
+		Don't worry about it!
+	\end{center}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+\documentclass{article}
+\end{lstlisting}
+\vdots
+\begin{lstlisting}
+\section{Practical Limitations
+		of Special Relativity}
+\end{lstlisting}
+}
+\begin{slide}
+	Just tell \LaTeX\ what type of document it is, and where to put the section
+	heading and what the title is.
+	\bigskip
+	\code
+\end{slide}
+
+\begin{slide}
+	\LaTeX's formatting decisions are like \mediatitle{The Emperor's New
+	Clothes.}
+	\begin{itemize}
+		\item If you don't like how \LaTeX\ formats things, you're an unfit,
+		incompetent, stupid person.
+		\item Except, ya'know, \LaTeX's output isn't a scam.  It's the real
+		deal.
+		\item \LaTeX's output is empirically perfect.
+		\footnote{Except tables, which it does in a non-perfect
+		manner by default.  Use Booktabs package to remedy.}
+	\end{itemize}
+	So let it decide for you.
+\end{slide}
+
+\subsection{Logical vs Formatted Markup}
+\defverbatim[colored]\code{
+\begin{lstlisting}
+% formating foreign languages
+\newcommand{\forlang}[1]{\textit{#1}}
+\end{lstlisting}
+\vdots
+\begin{lstlisting}
+What is the soup \forlang{du jour?}
+\end{lstlisting}
+}
+\begin{slide}
+	You should rarely use italics, bold, underline, etc directly.
+	\begin{itemize}
+		\item Rather, define a new command which describes what you're doing,
+		and have \emph{that} decide the formatting.
+	\end{itemize}
+	\code
+\end{slide}
+
+\begin{slide}
+	It's easy to change how everything using that command looks
+	without search/replacing.
+	\begin{itemize}
+		\item Italicized book titles
+		\item Later decided to italicize foreign language phrases
+		\item Don't want to confuse a foreign language phrase with a book title
+		\item Change book titles to be underlined rather than italicized
+		\item Just change \textbackslash booktitle command
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	It keeps you from unintentionally losing consistency with
+	formatting.
+	\begin{itemize}
+		\item My Vim presentation used
+		\begin{itemize}
+			\item vim commands in several modes
+			\item vim command names
+			\item key combinations
+			\item out-of-vim command-line commands
+			\item urls
+			\item examples
+			\item emphasis
+		\end{itemize}
+		Hard to keep track what used what formatting in my head!
+	\end{itemize}
+\end{slide}
+
+\subsection{} % - - - remove subsection - - -
+\begin{slide}
+None of the \LaTeX\ philosophy is required when using \LaTeX.
+\begin{itemize}
+	\item you can make your own section headings with \LaTeX
+	\item you can bold things directly with \LaTeX
+\end{itemize}
+However, it's a good idea to follow the philosophy anyways.
+\end{slide}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  LaTeX basics
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\titleslide{General \LaTeX\ Document Layout}
+
+\begin{slide}
+	\LaTeX\ documents can usually be broken up into two main sections:
+	\begin{itemize}
+		\item The Preamble
+		\item The Body
+	\end{itemize}
+\end{slide}
+
+\subsection{Preamble}
+\begin{slide}
+	The preamble is primarily used to set things up.
+	\begin{itemize}
+		\item This is where you indicate the type of document you are making
+		\begin{itemize}
+			\item Article, report, book, letter, beamer (presentations - what you
+			see right now)
+		\end{itemize}
+		\item General Information
+		\begin{itemize}
+			\item Font, page size, margins
+		\end{itemize}
+		\item Packages
+		\begin{itemize}
+			\item Booktabs (improved tables), amsmath (new math environments)
+		\end{itemize}
+		\item New commands and environments
+		\begin{itemize}
+			\item Formatting commands, definition environments
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\subsection{The Body}
+\begin{slide}
+	After the preamble is usually the line \textbackslash begin\{document\}
+	\begin{itemize}
+		\item This marks the beginning of the actual document's body
+		\item Everything between that and \textbackslash end\{document\} is
+		what is outputted, based on the preamble
+		\item Everything after \textbackslash end\{document\} is ignored
+	\end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+\documentclass{minimal}
+\begin{document}
+Hello World!
+\end{document}
+\end{lstlisting}
+}
+\begin{slide}
+Minimal \LaTeX\ document:
+\code
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+% beginning is called the ``preamble''
+% used to set things up
+\documentclass{article}          % type of doc
+\usepackage{booktabs}            % load package
+\usepackage[T1]{fontenc}         % load package
+\newcommand{\hf}{$\frac{1}{2}$}  % new command
+\title{the best number}
+\author{john doe}
+\date{\today}
+% actual document begins here
+\begin{document}
+\maketitle % use author, etc to make title
+\section{my childhood}
+Many people like integers, ever since
+I was every young, I've prefered \hf
+\end{document}
+\end{lstlisting}
+}
+\begin{slide}
+Slightly fuller \LaTeX\ document:
+\code
+\end{slide}
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%  LaTeX Basics
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\titleslide{\LaTeX\ Basics}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+You can't see comments % Like this part
+\end{lstlisting}
+}
+\subsection{Comments} % - - - comments - - -
+\begin{slide}
+	\begin{itemize}
+		\item Comments start with \%
+		\item No multi-line comments by default
+	\end{itemize}
+	\begin{coderesult}
+		You can't see comments % Like this part
+	\end{coderesult}
+\end{slide}
+
+\subsection{Whitespace} % - - - whitespace - - -
+\begin{slide}
+	\begin{itemize}
+		\item \LaTeX\ treats consecutive whitespace as a single space
+		\item except two consecutive newlines which indicate a paragraph break
+	\end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}[showtabs=true,showspaces=true]
+This        code
+	will all show   		   up
+on one	 line.
+\end{lstlisting}
+}
+\begin{slide}
+	\begin{coderesult}
+	This        code
+		will all show   		   up
+	on one	 line.
+	\end{coderesult}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+The fact that you can ignore
+newlines can   % it allows comments mid-sentence
+be quite useful.
+\end{lstlisting}
+}
+\begin{slide}
+	\begin{coderesult}
+		The fact that you can ignore
+		newlines can   % it allows comments mid-sentence
+		be quite useful.
+	\end{coderesult}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}[showtabs=true]
+	you can also
+		play with indentation
+	to pretty-fy code
+		without changing output
+\end{lstlisting}
+}
+\begin{slide}
+	\begin{coderesult}
+	you can also
+		play with indentation
+	to pretty-fy code
+		without changing output
+	\end{coderesult}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+This is a short paragraph about stuff and/or
+things.  I'm not exactly sure what to say.
+
+This is  new paragraph.  Could be about other
+things, like pizza.
+\end{lstlisting}
+}
+
+
+\begin{slide}
+	\begin{coderesult}
+	\hspace{2em}This is a short paragraph about stuff and/or
+	things.  I'm not exactly sure what to say.
+
+	\hspace{2em}This is  new paragraph.  Could be about other
+	things, like pizza.
+		\end{coderesult}
+\end{slide}
+
+\subsection{Commands} % - - - commands - - -
+\begin{slide}
+	\begin{itemize}
+		\item by default, commands start with \textbackslash
+		\item two different types of commands
+		\begin{itemize}
+			\item multi-character
+			\item single-character
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}[showspaces=true]
+Con\TeX t is cool
+but \LaTeX is cooler
+% Note lack of space after X when compiled
+\end{lstlisting}
+}
+\begin{slide}
+	multi-character commands
+	\begin{itemize}
+		\item \LaTeX\ reads from \textbackslash\ to first non-alphabetic
+		character.
+		\item If ends with whitespace, eats it.
+	\end{itemize}
+	\begin{block}{Code}
+	\code
+	\end{block}
+	\begin{block}{Result}
+	Con\TeX t is cool
+	but \LaTeX is cooler
+	\end{block}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}[showspaces=true]
+Con\TeX t is cool
+but \LaTeX\ is cooler % can't eat escaped space
+\end{lstlisting}
+}
+\begin{slide}
+	single-character commands
+	\begin{itemize}
+		\item Some commands are only one character.
+		\item may not be alphabetic
+	\begin{block}{Code}
+	\code
+	\end{block}
+	\begin{block}{Result}
+	Con\TeX t is cool
+	but \LaTeX\ is cooler % can't eat escaped space
+	\end{block}
+	\end{itemize}
+\end{slide}
+
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+To break lines\\ in   % line breaks at \\
+\LaTeX,               % individual LF is ignored
+use \textbackslash\textbackslash
+\end{lstlisting}
+}
+\begin{slide}
+	to break a line, but not make a new paragraph, use
+	\textbackslash\textbackslash
+	\begin{block}{Code}
+	\code
+	\end{block}
+	\begin{block}{Result}
+	To break lines\\ in   % line breaks at \\
+	\LaTeX,               % individual LF is ignored
+	use \textbackslash\textbackslash
+	\end{block}
+\end{slide}
+
+\begin{slide}
+	Reserved Characters
+	\begin{itemize}
+		\item Many other characters are reserved but can be accessed by
+		escaping (e.g.\@ \textbackslash \%)
+		\begin{itemize}
+			\item \#, \$, \%, \&, \_, \{, \}
+		\end{itemize}
+		\item others need a \{\} after their escaped version
+		(e.g.\textbackslash \@\~{}\{\})
+		\begin{itemize}
+			\item \~{}, \^{}
+		\end{itemize}
+		\item still others need a command
+		\begin{itemize}
+			\item \textbackslash textbackslash yields a \textbackslash
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\subsection{Arguments/Curly Brackets} % - - - arguments - - -
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+Sometimes you just have to be \textbf{bold.}
+\end{lstlisting}
+}
+\begin{slide}
+	Many commands have arguments.
+	\begin{itemize}
+		\item Mandatory arguments usually go in \{\} pairs
+		\item Optional arguments usually go in [] pairs
+	\end{itemize}
+	\begin{coderesult}
+		Sometimes you just have to be \textbf{bold.}
+	\end{coderesult}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+Most arguments are actually
+only one \textbf token.
+\end{lstlisting}
+}
+\begin{slide}
+	Technically, \{\} combine multiple tokens into one token.
+	\begin{itemize}
+		\item think C-style \{\} grouping multiple lines into one.
+		\item most commands with arguments are looking at the next token
+	\end{itemize}
+	\begin{coderesult}
+		Most arguments are actually only one \textbf token.
+	\end{coderesult}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+Curley braces are {\tiny also used for} scoping
+\end{lstlisting}
+}
+
+\begin{slide}
+	Curly braces are also used for scoping
+	\begin{coderesult}
+	Curley braces are {\tiny also used for\/} scoping
+	\end{coderesult}
+\end{slide}
+
+\subsection{Environments} % - - - environments - - -
+
+\begin{slide}
+	Environments are effectively commands that are intended to have large or
+	special arguments.
+	\begin{itemize}
+		\item They begin with \textbackslash begin\{environment-name\}
+		\item and end with \textbackslash end\{environment-name\}
+		\item can be used in weird cases where normal commands wouldn't work
+	\end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+\begin{center}
+	This text is centered
+\end{center}
+\end{lstlisting}
+}
+\begin{slide}
+	\begin{coderesult}
+		\begin{center}
+			This text is centered
+		\end{center}
+	\end{coderesult}
+\end{slide}
+
+\subsection{Modes} % - - - modes - - -
+
+\begin{slide}
+	\LaTeX\ has three modes
+	\begin{itemize}
+		\item paragraph mode - default, normal
+		\item math mode - for typesetting mathematics
+		\item LR mode - not normally important
+	\end{itemize}
+\end{slide}
+
+\begin{slide}
+	To get to math mode:
+	\begin{itemize}
+		\item in-line math is between single \$'s
+		\item A few ways to get to display math:
+		\begin{itemize}
+			\item between \$\$'s (not recommended)
+			\item between \textbackslash[ \textbackslash]
+			\item within special environments (such as equation)
+		\end{itemize}
+	\end{itemize}
+\end{slide}
+
+\defverbatim[colored]\code{
+\begin{lstlisting}
+\begin{equation}
+	ax^2+bx+c=0 \label{eqn:quadratic}
+\end{equation}
+How do I find the roots of $x$
+in equation \eqref{eqn:quadratic}
+\end{lstlisting}
+}
+\begin{slide}
+	\begin{coderesult}
+	\begin{equation}
+		ax^2+bx+c=0 \label{eqn:quadratic}
+	\end{equation}
+	How do I find the roots of $x$ in equation \eqref{eqn:quadratic}
+	\end{coderesult}
+\end{slide}
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+% Where to go to learn more
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\renewcommand{\thefootnote}{\arabic{footnote}} % numbered footnotes
+\setcounter{footnote}{0}                       % reset footnote numbering
+\titleslide{Where to go to Learn More}
+\begin{slide}
+	\begin{itemize}
+		\normalsize
+		\item Wikibooks
+		\footnote{
+			HTML:\\ \url{https://secure.wikimedia.org/wikibooks/en/wiki/LaTeX}
+		}
+		\footnote{
+			PDF:\\ \url{http://upload.wikimedia.org/wikipedia/commons/2/2d/LaTeX.pdf}
+		}
+		\item The Not So Short Introduction to \LaTeXe
+		\footnote{
+			PDF:\\ \url{http://www.ctan.org/tex-archive/info/lshort/english/lshort.pdf}
+		}
+		\item \mediatitle{The \TeX book} by Donald E. Knuth (Plain \TeX)
+		\footnote{
+		 	\TeX:\\
+			\url{http://tex.loria.fr/general/texbook.tex}
+		}
+		\footnote{
+		 \$32.20:
+			\url{http://www.amazon.com/TeXbook-Donald-Knuth/dp/0201134489}
+		}
+		\item \mediatitle{\LaTeX: A Document Preparation System} by Leslie Lamport
+		\footnote{
+		 \$29.99:
+			\url{http://www.amazon.com/LaTeX-Document-Preparation-System-2nd/dp/0201529831}
+		}
+		\item \mediatitle{The \LaTeX\ Companion}
+		\footnote{
+		 \$54.56:
+			\url{http://www.amazon.com/gp/product/0201362996}
+		}
+	\end{itemize}
+\end{slide}
+
+\end{document}
+\section{\LaTeX\ gotchas}
+\section{Where to go from here}
+
+latex   - 219
+tex     - 5
+context - 9
+
+Beamer user guide - 240p
+pgf/tikz manual -
+
+
+\definecolor{item}{RGB}{253,198,137}     % item color, pastel peach

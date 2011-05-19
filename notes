@@ -1,0 +1,68 @@
+Declarative - Smart Compilers
+- Describe High Level Algorithms
+- Type Inference & Type Saftey
+First Class Functions
+- Functions as Objects
+- Abstracting Common Patterns
+Pure Functions
+- Consistent, Predictible Results
+- Safety, Optimization
+Immutability
+- Reusing List Links
+Parallelism
+- Locks Unnecessary
+- Order of execution negotiated by compiler
+
+Extra Stuff:
+- The FP Crowd is really good at noticing patterns and
+
+
+Short Haskell Syntax Basics
+- Bool, Chars, Strings, Basic Numbers, Lists
+- Function Signatures
+  - 12 :: Integer
+  - [1,2,3] :: [Integer]
+  - sum :: [Integer] -> Integer
+- Data definitions
+ - data Bool = True | False
+ - data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
+ - data Shape = Circle Float Float Float | Rectangle Float Float Float Float
+ -  ghci> :t Circle
+ -  Circle :: Float -> Float -> Float -> Shape
+ -  ghci> :t Rectangle
+ -  Rectangle :: Float -> Float -> Float -> Float -> Shape
+ - data Maybe a = Nothing | Just a
+
+- Function Definitions
+  isEven :: Integer -> Integer -> Bool
+  isEven x = (mod x 2) == 0
+
+
+- Typeclasses
+  isEven :: Integral a => a -> a -> Bool
+  isEven x = (mod x 2) == 0
+
+Basic Data Structures
+- Ranges, Tuples
+Pattern Matching
+- instead of doing lots of == comparisons
+
+  surface :: Shape -> Float
+  surface (Circle _ _ r) = pi * r ^ 2
+  surface (Rectangle x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
+
+- Maybe, Lists
+- Case
+- Guards
+Functional Programming
+- Recursion
+- Currying
+    ghci> :t (+)
+    (+) :: Num a => a -> a -> a
+    ghci> :t (+ 1)
+    (+ 1) :: Num a => a -> a
+- First Class Functions
+- map, foldl, foldr, any, all
+Advanced Data Structures (persistent)
+ - Parallelism Wins
+
