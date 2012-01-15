@@ -1,73 +1,41 @@
-Declarative - Smart Compilers
-- Describe High Level Algorithms
-- Type Inference & Type Saftey
-First Class Functions
-- Functions as Objects
-- Abstracting Common Patterns
-Pure Functions
-- Consistent, Predictible Results
-- Safety, Optimization
-Immutability
-- Reusing List Links
-Parallelism
-- Locks Unnecessary
-- Order of execution negotiated by compiler
+Haskell slide
+ - sweet type system
+ - lazy
+ - good at
+ - use in industry
 
-Extra Stuff:
-- The FP Crowd is really good at noticing patterns and
+- There’s a familiar sinking feeling I get when reading a piece of Haddock, to find myself referred to someone’s PhD thesis for a description of what’s going on. - Bryan O'Sullivan
 
+One of our programming maxims at Jane Street is to “make illegal states unrepresentable”. - Yaron Minsky
+In practice, though, the type system is a powerful tool that helps to prevent mistakes, by forcing you to do some thinking up front. It’s not something you put up with; it’s something you value, albeit after a while. One of the difficulties of crossing the Rubicon from type system outsider to insider is that it’s hard to find motivating examples in small, easily understood chunks of code, the sort of code that one writes as a beginner. The value doesn’t really begin to accrue until you’re either writing something moderately complex or refactoring existing code. - Byran O'Sullivan
 
-Short Haskell Syntax Basics
-- Bool, Chars, Strings, Basic Numbers, Lists
-- Function Signatures
-  - 12 :: Integer
-  - [1,2,3] :: [Integer]
-  - sum :: [Integer] -> Integer
-- Data definitions
- - data Bool = True | False
- - data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
- - data Shape = Circle Float Float Float | Rectangle Float Float Float Float
- -  ghci> :t Circle
- -  Circle :: Float -> Float -> Float -> Shape
- -  ghci> :t Rectangle
- -  Rectangle :: Float -> Float -> Float -> Float -> Shape
- - data Maybe a = Nothing | Just a
+Robert Martin's What Killed Smalltalk could Kill Ruby from RailsConf '09:
+http://www.youtube.com/watch?v=YX3iRjKj7C0
 
-- Function Definitions
-  isEven :: Integer -> Integer -> Bool
-  isEven x = (mod x 2) == 0
+explain prefix-notation carefully. start with more parens than necessary, lisp-like.
+spend more time on map and reduce. do examples for each.
+
+http://haskell.org/haskellwiki/Haskell_in_industry
 
 
-- Typeclasses
-  isEven :: Integral a => a -> a -> Bool
-  isEven x = (mod x 2) == 0
+What is Haskell Good for?
+There is one good answer for what a general purpose language like Haskell is good for: writing programs in general.
 
-Basic Data Structures
-- Ranges, Tuples
-Pattern Matching
-- instead of doing lots of == comparisons
+For what it is used for in practice, I've three approaches to establishing that:
 
-  surface :: Shape -> Float
-  surface (Circle _ _ r) = pi * r ^ 2
-  surface (Rectangle x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
+A tag cloud of Haskell library and app areas, weighted by frequency on Hackage.
+Indicates that it is good for graphics, networking, systems programming, data structures, databases, development, text processing ...
 
-- Maybe, Lists
-- Case
-- Guards
+Areas it is used in industry - a lot of DSLs, web apps, compiler design, networking, analysis, systems programming , ...
+And finally, my opinion on what it is really strong at:
+
+Problems where correctness matters, domain specific languages, and parallel and concurrent programming
+-dons
 
 
-Functions
-- Recursion
-- Currying
-    ghci> :t (+)
-    (+) :: Num a => a -> a -> a
-    ghci> :t (+ 1)
-    (+ 1) :: Num a => a -> a
-- First Class Functions
-- map, foldl, foldr, any, all
+Good Example: More Advanced Behavior Interpretation by Reading Type Signatures
+ghci> mapM id [Just 12, Just 20, Just 14]
+Just [12, 20, 14]
+:: Maybe [Int]
 
-laziness
-
-Advanced Data Structures (persistent)
- - Parallelism Wins
-
+briefly: data structures vs objects
