@@ -12,6 +12,7 @@
 \usepackage{cancel}                     % \cancel in math
 \usepackage{varioref}                   % \vpageref cross referencing
 \usepackage{listings}                   % code formatting
+\DeclareGraphicsExtensions{.png}
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %  Theming
@@ -170,11 +171,9 @@
 
 \title{Introduction to Weird Functional Languages with Haskell}    % title
 \author{
-	Alex ``saterus'' Burkhart\\          % author
+	Alex Burkhart\\          % author
 	The Ohio State University\\          % university
-	Open Source Club                     % club
 }
-\date{2011-05-19}                       % date
 
 % =============================================================================
 %  actual document begins here
@@ -211,7 +210,19 @@
 
 \titleslide{Functional Programming}
 
+\subsection{The Functional Discipline}
+
+\begin{slide}
+  Discipline: Restrictions with Benefits
+  \begin{itemize}
+    \item Eliminate GOTOs
+    \item Eliminate Global Variables
+    \item Eliminate the ``Useful and Flexible, but Unpredictable''
+  \end{itemize}
+\end{slide}
+
 \subsection{The Functional Paradigm}
+
 \begin{slide}
   \begin{itemize}
     \item Declarative
@@ -226,6 +237,7 @@
   Declarative
   \begin{itemize}
     \item ``What'' instead of ``How''
+    \item Transformations of Data
     \item Smart Compilers
     \item Safety and Correctness
   \end{itemize}
@@ -243,10 +255,25 @@
 \begin{slide}
   Pure Functions
   \begin{itemize}
-    \item No I/O or Modification of State
     \item Consistent, Predictible Results
+    \item No I/O or Modification of State
     \item Safety
     \item Optimization
+    \item Testing
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \textbf{Referential Transparency}:
+  Every occurance of a function f can be replaced with its return value without affecting the observable result of the program.
+  \begin{itemize}
+    \item public int foo(Thing x) \{\\
+  ~~int z = bar(x);\\
+  ~~\textbackslash\textbackslash do some stuff\\
+  ~~launchMissiles(x);\\
+  ~~\textbackslash\textbackslash do some more stuff...\\
+  ~~return z + 1;\\
+  \}
   \end{itemize}
 \end{slide}
 
@@ -255,14 +282,14 @@
   \begin{itemize}
     \item Can't Change Data
     \item Immutable Structures can be Shared
-    \item Reusing List Links
+    \item e.g. Reusing Cons Cells / List Links
   \end{itemize}
 \end{slide}
 
 \begin{slide}
   Parallelism
   \begin{itemize}
-    \item Locks Unnecessary
+    \item Locks Unnecessary (less necessary)
     \item Order of Execution negotiated by Compiler
   \end{itemize}
 \end{slide}
@@ -283,27 +310,26 @@
 \subsection{Basic Syntax}
 
 \begin{slide}
-  Basic Data Structures
+  Basic Data Structures (nothing is an object)
   \begin{itemize}
-    \item Bool, Char, Numbers, List, String, Tuples, Functions
-    \item True and False
-    \item 'a' through 'z' and more
-    \item Ratios and Arbitrary Size Numbers
-    \item{}{} [1, 2, 3]
-    \item (1, 3)
-    \item (+), sum
+    \item Booleans: True and False
+    \item Characters: 'a' through 'z' and all your favorites
+    \item Numbers: Classics with Ratios \& Arbitrary Size/Precision Numbers
+    \item Functions: toUpper, sum, (+), (:)
+    \item{}{} Lists [1, 2, 3] == 1 : 2 : 3 : []
+    \item{}{} Ranges: [1..100], ['a'..'z'], [10,9.5..0], ['z','y'..'a']
+    \item Tuples: (1, 3), ('T', [1,2,3]), (4, 'O', 4)
   \end{itemize}
 \end{slide}
 
 \begin{slide}
-  Function Signatures
+  Functions Definitions
   \begin{itemize}
-    \item 12 :: Int
-    \item{}{} [1, 2, 3] :: [Integer]
-    \item{}{} ['f', 'o', 'o'] :: String
-    \item (1, 3) :: (Int, Int)
-    \item (+) :: Int -> Int -> Int
-    \item sum :: [Integer] -> Integer
+    \item twelve = 12
+    \item doubleMe x = x + x
+    \item even x = ((mod x 2) == 0)
+    \item odd x = (not (even x))
+    \item arbitrary f lst x = ((f x) : lst)
   \end{itemize}
 \end{slide}
 
@@ -311,11 +337,55 @@
   Algebraic Data Types
   \begin{itemize}
     \item data Bool = True | False
-    \item data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
     \item data Color = Red | Green | Blue
-    \item data TrafficLight = Light String String Color
+    \item data TrafficLight = Light [Char] [Char] Color
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Type Parameters
+  \begin{itemize}
     \item data Maybe a = Nothing | Just a
     \item data Either a b = Left a | Right b
+  \end{itemize}
+\end{slide}
+
+\subsection{With Types}
+
+\begin{slide}
+  Haskell's Type System
+  \begin{itemize}
+    \item \textbf{Strong} \& Weak Typing
+    \item \textbf{Static} \& Dynamic Typing
+    \item Typecheck instead of ``Run \& Pray''
+    \item Type Inference \& GHCi
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Function Signatures
+  \begin{itemize}
+    \item 12 :: Int
+    \item{}{} [1, 2, 3] :: [Int]
+    \item{}{} ['f', 'o', 'o'] :: [Char]
+    \item ``foo'' :: [Char]
+    \item (4, 'O', 4) :: (Int, Char, Int)
+    \item sum :: [Int] -> Int
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Quiz:\\
+  \begin{itemize}
+    \item ? :: Int -> Int -> Int
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Quiz:\\
+  \begin{itemize}
+    \item ? :: Int -> Int -> Int
+    \item ? :: [Int] -> [Int]
   \end{itemize}
 \end{slide}
 
@@ -323,23 +393,40 @@
   Function Definitions
   \begin{itemize}
     \item
-
-      even :: Integer -> Integer -> Bool\\
+      doubleMe :: Int -> Int\\
+      doubleMe x = x + x
+    \item
+      even :: Int -> Bool\\
       even x = (mod x 2) == 0
     \item
-      odd :: Integer -> Integer -> Bool\\
       odd x = not (even x)
-    \item
-      doubleMe x = x + x
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Value Constructors
+  \begin{itemize}
+    \item data Bool = True | False
+    \item The parts after the = are \textit{Value Constructors}.\\
+      e.g. True and False
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Type Constructors
+  \begin{itemize}
+    \item data Maybe a = Nothing | Just a
+    \item The parts before the = are \texit{Type Constructors}.\\
+      e.g. Maybe Int
   \end{itemize}
 \end{slide}
 
 \subsection{Typeclasses}
 
 \begin{slide}
-  The Problem
+  Typeclasses
   \begin{itemize}
-    \item Function Scope
+    \item The Problem: Function Scope
     \item Equality for the Color type\\
 
       (==) :: Color -> Color -> Bool\\
@@ -348,16 +435,26 @@
 \end{slide}
 
 \begin{slide}
-  The Solution
+  Typeclasses
   \begin{itemize}
-    \item Ad-hoc polymorphic interfaces
+    \item The Solution: Ad-Hoc Polymorphic Interfaces
     \item
+      class Foo var where\\
+      ~~bar x :: a -> b\\
+      ~~baz x y :: a -> b -> c\\
+      ~~reFoo f :: var -> var
+  \end{itemize}
+\end{slide}
 
+\begin{slide}
+  \begin{itemize}
+  \item \textit{(Somewhere in the core libraries...)}
+    \item
       class Eq a where\\
       ~~(==) :: a -> a -> Bool\\
       ~~(/=) :: a -> a -> Bool
+    \item \textit{(Later on, in our file...)}
     \item
-
       instance Eq Color where\\
       ~~(==) :: Color -> Color -> Bool\\
       ~~(==) a b = ...
@@ -368,39 +465,51 @@
 \end{slide}
 
 \begin{slide}
-  The Win
+  Function Signatures Updated
   \begin{itemize}
-    \item Typeclass Deriving
-    \item
-
-      data Color = Red | Green | Blue\\
-      ~~deriving (Eq, Show, Read)
-    \item Automatically derive instances of Read, Show, Bounded, Enum, Eq, and Ord.
+    \item 12 :: Num a => a
+    \item{} [1,2,3] :: Num a => [a]
+    \item even :: Integral a => a -> a -> Bool
+    \item sort :: Ord a => [a] -> [a]
   \end{itemize}
 \end{slide}
 
 \begin{slide}
-  Function Signatures Updated
+  Bonus!
   \begin{itemize}
-    \item 12 :: (Num a) => a
-    \item{} [1,2,3] :: (Num a) => [a]
-    \item even :: Integral a => a -> a -> Bool
-    \item sort :: (Ord a) => [a] -> [a]
+    \item Typeclass Deriving
+    \item
+      data Color = Red | Green | Blue\\
+      ~~deriving (Eq, Show, Read)
+    \item Compiler can automatically derive instances of Read, Show,
+      Bounded, Enum, Eq, and Ord.
+    \item Libraries add additional derivations.
   \end{itemize}
 \end{slide}
 
 \subsection{Pattern Matching}
 
 \begin{slide}
-  Avoid lot's of manual == comparisons
+  isRed :: Color -> Bool\\
+  isRed c = if c == Red\\
+  ~~~~~~~~~~~~~~then True\\
+  ~~~~~~~~~~~~~~else False\\
+  \mbox{}\\
+  equals :: Color -> Color -> Bool\\
+  equals x y = if x == Red \&\& y == Red...
+\end{slide}
+
+\begin{slide}
+  Avoid manual equality comparisons
   \begin{itemize}
     \item data Color = Red | Green | Blue
-    \item Implement Show
+    \item Implement Show ~~~\textit{(toString)}
     \item Implement (==)
   \end{itemize}
 \end{slide}
 
 \begin{slide}
+  Pattern Matching: Pick data structures apart based on their constructors
   \begin{itemize}
     \item data Color = Red | Green | Blue
       \item
@@ -408,6 +517,7 @@
         show Red = ``Red''\\
         show Green = ``Green''\\
         show Blue = ``Blue''
+      \item No ``else'' case needed
   \end{itemize}
 \end{slide}
 
@@ -429,7 +539,7 @@
     \item val1 = Just 73
     \item val2 = Nothing
     \item possiblyDouble :: Maybe Int -> Maybe Int\\
-      possiblyDouble x = undefined
+      possiblyDouble x = ...?
   \end{itemize}
 \end{slide}
 
@@ -440,7 +550,7 @@
     \item val2 = Nothing
     \item possiblyDouble :: Maybe Int -> Maybe Int\\
       possiblyDouble Nothing = Nothing\\
-      possiblyDouble (Just x) = x + x
+      possiblyDouble (Just x) = Just (x + x)
   \end{itemize}
 \end{slide}
 
@@ -450,7 +560,7 @@
     \item myList = [1,2,3,4,5]
     \item sum :: [Int] -> Int -> Int\\
           sum [] acc     = acc\\
-          sum [x:xs] acc = sum xs (acc + x)
+          sum (x:xs) acc = sum xs (acc + x)
   \end{itemize}
 \end{slide}
 
@@ -462,7 +572,7 @@
     \item possiblyDouble :: Maybe Int -> Maybe Int\\
       possibleDouble x = case x of\\
       ~~~~Nothing -> Nothing\\
-      ~~~~(Just x) -> x + x
+      ~~~~(Just x) -> Just (x + x)
   \end{itemize}
 \end{slide}
 
@@ -487,7 +597,7 @@
     \item myList = [1,2,3,4,5]
     \item sum :: [Int] -> Int -> Int\\
           sum [] acc     = acc\\
-          sum [x:xs] acc = sum xs (acc + x)
+          sum (x:xs) acc = sum xs (acc + x)
   \end{itemize}
 \end{slide}
 
@@ -495,9 +605,9 @@
 
 \begin{slide}
   \begin{itemize}
+    \item map :: (a -> b) -> [a] -> [b]
     \item myList = [1,2,3,4,5]
     \item double :: Int -> Int
-    \item map :: (a -> b) -> [a] -> [b]
   \end{itemize}
 \end{slide}
 
@@ -506,6 +616,14 @@
     \item example = ``things''
     \item toUpper :: Char -> Char
     \item map :: (a -> b) -> [a] -> [b]
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    map :: (a -> b) -> [a] -> [b]
+    map _ []     = []
+    map f (x:xs) = f x : map f xs
   \end{itemize}
 \end{slide}
 
@@ -597,6 +715,7 @@
     \item \((f \circ g)(x) \equiv f(g(x))\) -- math, not Haskell
     \item (.) :: (b -> c) -> (a -> b) -> a -> c
     \item f . g = \textbackslash x -> f (g x)
+    \item minimum = head . sort
     \item{}{}
       map (\textbackslash x -> negate (abs x)) [5,-3,-6,7,-3,2,-19]\\
       => [-5,-3,-6,-7,-3,-2,-19]
@@ -627,8 +746,6 @@
     \item  [1..] :: (Num t) => [t]
     \item take 5 [1..]
     \item length [1..] -- Bad Idea
-    \item fac 0 = 1\\
-      fac n = n * fac (n - 1)
     \item fib = 0 : 1 : zipWith (+) fib (tail fib)
   \end{itemize}
 \end{slide}
@@ -663,6 +780,23 @@
   \end{itemize}
 \end{slide}
 
+\begin{slide}
+  Circular List
+  \begin{itemize}
+    \item cycle ``hey''
+    \item \includegraphics[width=\linewidth]{circular_list}
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  Reusing Cons Cells / List Links
+  \begin{itemize}
+    \item h = ``hey''\\
+    \item (h, ('k':tail h))\\
+    \item \includegraphics[width=\linewidth]{cons_reuse}
+  \end{itemize}
+\end{slide}
+
 
 \titleslide{Custom Data Structures}
 \subsection{List}
@@ -684,8 +818,8 @@
 \subsection{Binary Tree}
 \begin{slide}
   \begin{itemize}
-    \item data Tree a = Leaf a | Node (Tree a) (Tree a)
-    \item testTree = Node (Node (Leaf 2) (Node (Node (Leaf 12) (Leaf 7)) (Leaf 3))) (Leaf 9)
+    \item data Tree a = Empty | Node a (Tree a) (Tree a)
+    \item testTree = TODO
     \item
       tMap :: (a -> b) -> Tree a -> Tree b\\
       tMap f (Leaf x)   = Leaf (f x)\\
@@ -788,8 +922,8 @@
       plusX [1,2,3,4,5] :: Num a => [a -> a]
     \item fmap again?
     \item
-      class (Functor f) => Applicative f where
-      ~~pure :: a -> f a
+      class (Functor f) => Applicative f where\\
+      ~~pure :: a -> f a\\
       ~~(<*>) :: f (a -> b) -> f a -> f b
     \item
       plusX [1,2,3,4] <*> [10]
@@ -799,11 +933,25 @@
 \begin{slide}
   \begin{itemize}
     \item
-      instance Applicative Maybe where
-      ~~pure = Just
-      ~~Nothing <*> \_ = Nothing
+      instance Applicative Maybe where\\
+      ~~pure = Just\\
+      ~~Nothing <*> \_ = Nothing\\
       ~~(Just f) <*> something = fmap f something
     \item pure (+3) <*> Just 9
+    \item Just (++"hahah") <*> Nothing
+    \item Nothing <*> Just "woot"
+    \item pure (+) <*> Just 3 <*> Just 5
+  \end{itemize}
+\end{slide}
+
+\begin{slide}
+  \begin{itemize}
+    \item
+      instance Applicative [] where\\
+      ~~pure = []\\
+      ~~[] <*> \_ = []\\
+      ~~(f:fs) <*> xs = (fmap f xs) ++ (fs <*> xs)
+    \item pure (+) <*> pure 1 <*> pure 3
     \item Just (++"hahah") <*> Nothing
     \item Nothing <*> Just "woot"
     \item pure (+) <*> Just 3 <*> Just 5
