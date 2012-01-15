@@ -1,7 +1,7 @@
-all: slides.html
+all: index.html
 
-slides.html: slides.md
+index.html: index.md
 	pandoc --offline -s -t slidy -o $@ $<
 
 clean:
-	-rm -f slides.html
+	-rm -f index.html
