@@ -525,7 +525,19 @@ Alex Burkhart
 </ul>
 </div>
 <div class="slide">
-<h1 id="part-2-basic-haskell-syntax">Part 2: Basic Haskell Syntax</h1>
+<h1 id="part-2-basic-haskell">Part 2: Basic Haskell</h1>
+</div>
+<div class="slide">
+<h1 id="quick-tools-rundown">Quick Tools Rundown</h1>
+<ul>
+<li>GHC: The Glorious Glasgow Haskell Compilation System, version 7.0.3</li>
+<li>GHCi: GHC Interpreter</li>
+<li>Hackage: Haskell Package Database</li>
+<li>Cabal: Automated build, library, and dependency management tool</li>
+<li>Hoogle: Haskell Documentation Search</li>
+<li>Haskell.org: Community Website</li>
+<li>#haskell on FreeNode: Very large, active IRC Channel</li>
+</ul>
 </div>
 <div class="slide">
 <h1 id="basic-syntax">Basic Syntax</h1>
@@ -634,6 +646,13 @@ Alex Burkhart
 <pre class="sourceCode"><code class="sourceCode haskell">val1 <span class="fu">=</span> <span class="dv">5</span><br />val2 <span class="fu">=</span> <span class="dv">9001</span><br /><br /><span class="ot">doubleSmall </span><span class="ot">::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span><br />doubleSmall x<br />  <span class="fu">|</span> (<span class="fu">abs</span> x) <span class="fu">&lt;=</span> <span class="dv">9000</span> <span class="fu">=</span> x <span class="fu">+</span> x<br />  <span class="fu">|</span> <span class="fu">otherwise</span>       <span class="fu">=</span> x</code></pre>
 </div>
 <div class="slide">
+<h1 id="polymorphism">Polymorphism</h1>
+<p>Parametric Polymorphism: a function does exactly the same thing regardless of type.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">id</span><span class="ot"> </span><span class="ot">::</span> a <span class="ot">-&gt;</span> a                    <span class="co">-- for all types a, return an a</span><br /><span class="fu">map</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]</code></pre>
+<p>Ad Hoc Polymorphism: a function does different things based on the type.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">show</span><span class="ot"> </span><span class="ot">::</span> a <span class="ot">-&gt;</span> <span class="dt">String</span>  <span class="co">-- how do we know we can show this type?</span></code></pre>
+</div>
+<div class="slide">
 <h1 id="typeclasses">Typeclasses</h1>
 <p>The Problem: Function Scope</p>
 <p>Equality for the Color type</p>
@@ -653,7 +672,26 @@ Alex Burkhart
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="kw">Eq</span> <span class="dt">Color</span> <span class="kw">where</span><br /><span class="ot">  (==) </span><span class="ot">::</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />  (<span class="fu">==</span>) <span class="dt">Red</span> <span class="dt">Red</span>     <span class="fu">=</span> <span class="kw">True</span><br />  (<span class="fu">==</span>) <span class="dt">Green</span> <span class="dt">Green</span> <span class="fu">=</span> <span class="kw">True</span><br />  (<span class="fu">==</span>) <span class="dt">Blue</span> <span class="dt">Blue</span>   <span class="fu">=</span> <span class="kw">True</span><br />  (<span class="fu">==</span>) _ _         <span class="fu">=</span> <span class="kw">False</span><br /><br /><span class="ot">  (/=) </span><span class="ot">::</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />  (<span class="fu">/=</span>) a b <span class="fu">=</span> <span class="fu">not</span> (a <span class="fu">==</span> b)</code></pre>
 </div>
 <div class="slide">
+<h1 id="using-typeclasses">Using Typeclasses</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">(+) </span><span class="ot">::</span> <span class="kw">Num</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a<br /><br /><span class="fu">show</span><span class="ot"> </span><span class="ot">::</span> <span class="kw">Show</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">String</span></code></pre>
+<p>Compiler can automatically derive instances of Read, Show, Bounded, Enum, Eq, and Ord.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Color</span> <span class="fu">=</span> <span class="dt">Red</span> <span class="fu">|</span> <span class="dt">Green</span> <span class="fu">|</span> <span class="dt">Blue</span><br />      <span class="kw">deriving</span> (<span class="kw">Eq</span>, <span class="kw">Show</span>, <span class="kw">Read</span>)</code></pre>
+</div>
+<div class="slide">
+<h1 id="modules">Modules</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">import</span> <span class="dt">Data.List</span> (nub, <span class="fu">sort</span>)<br /><span class="kw">import</span> <span class="kw">qualified</span> <span class="dt">Data.Map</span> <span class="kw">as</span> <span class="dt">M</span> <span class="kw">hiding</span>(fold)</code></pre>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">We.Use.Dots.To.Namespace.Crazy.Lib</span><br />( <span class="dt">CrazyData</span>(<span class="fu">..</span>)<br />, volume<br />, price<br />) <span class="kw">where</span><br /><br /><span class="co">-- implementation details</span></code></pre>
+<p>See Hackage for more examples of the namespace heirarchy.</p>
+</div>
+<div class="slide">
 <h1 id="part-4-thinking-functionally">Part 4: Thinking Functionally</h1>
+</div>
+<div class="slide">
+<h1 id="local-binding">Local Binding</h1>
+<p>Where binds after/below use. Tends to be used for defining local functions.</p>
+<pre class="sourceCode"><code class="sourceCode haskell">sumMaybes <span class="fu">=</span> <span class="fu">foldl</span> maybeAdd <span class="dv">0</span> someNumbers<br />    <span class="kw">where</span> maybeAdd acc <span class="kw">Nothing</span> <span class="fu">=</span> acc<br />          maybeAdd acc (<span class="kw">Just</span> v) <span class="fu">=</span> acc <span class="fu">+</span> v</code></pre>
+<p>Let creates them before/above use. Tends to be used for computing values.</p>
+<pre class="sourceCode"><code class="sourceCode haskell">minPayment price interestRate <span class="fu">=</span> <span class="kw">let</span> loanFee <span class="fu">=</span> <span class="dv">0</span><span class="fu">.</span><span class="dv">01</span><br />                                    interest <span class="fu">=</span> basePrice <span class="fu">*</span> interestRate<br />                                <span class="kw">in</span> loanFee <span class="fu">+</span> interest</code></pre>
 </div>
 <div class="slide">
 <h1 id="to-understand-recursion...">To Understand Recursion...</h1>
@@ -664,15 +702,94 @@ Alex Burkhart
 <pre class="sourceCode"><code class="sourceCode haskell">myList <span class="fu">=</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>]<br /><br /><span class="fu">length</span><span class="ot"> </span><span class="ot">::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span><br /><span class="fu">length</span> lst <span class="fu">=</span> length' lst <span class="dv">0</span><br />       <span class="kw">where</span> length' [] len <span class="fu">=</span> len<br />             length' (x<span class="fu">:</span>xs) len <span class="fu">=</span> length' xs (len <span class="fu">+</span> <span class="dv">1</span>)</code></pre>
 </div>
 <div class="slide">
+<h1 id="laziness">Laziness</h1>
+<p>Automatically a lazy language. Expressions are evaluated only when they are needed.</p>
+<p>In effect, everything short circuits.</p>
+<pre class="sourceCode"><code class="sourceCode haskell">[<span class="dv">1</span><span class="fu">..</span>] <span class="co">-- infinite list of integers</span><br /><br /><span class="fu">take</span> <span class="dv">5</span> [<span class="dv">1</span><span class="fu">..</span>]<br /><br />times_ten x <span class="fu">=</span> x <span class="fu">*</span> <span class="dv">10</span><br /><br /><span class="fu">take</span> <span class="dv">5</span> (<span class="fu">map</span> times_ten [<span class="dv">1</span><span class="fu">..</span>])</code></pre>
+</div>
+<div class="slide">
+<h1 id="strictness">Strictness</h1>
+<pre class="sourceCode"><code class="sourceCode haskell">f <span class="fu">!</span>x <span class="fu">=</span> x <span class="fu">+</span> x<br /><br /><span class="kw">data</span> <span class="dt">Foo</span> <span class="fu">=</span> <span class="fu">!</span><span class="dt">Int</span> <span class="fu">!</span><span class="dt">String</span> <span class="dt">Char</span></code></pre>
+<p>Sequence evaluation. Forces the evaluation the first arg, then the second and return the result second. Strict for both args.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">seq</span><span class="ot"> </span><span class="ot">::</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b<br /><span class="fu">seq</span> x y <span class="fu">=</span> <span class="fu">...</span> <span class="co">-- must be a special compiler primitive.</span></code></pre>
+<p><strong><em>Can sometimes screw up the compiler by ruining short cut fusion optimizations that would otherwise be possible. Use carefully.</em></strong></p>
+</div>
+<div class="slide">
 <h1 id="higher-order-functions">Higher Order Functions</h1>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]<br /><br /><span class="fu">filter</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]<br /><br /><span class="fu">zipWith</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> [c]<br /><br /><span class="fu">foldl</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> a<br /><br /><span class="fu">foldl1</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a<br /><br /><span class="fu">foldr</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b<br /><br /><span class="fu">foldr1</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a<br /><br /><span class="fu">any</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span><br /><br /><span class="fu">all</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre>
 </div>
 <div class="slide">
-<h1 id="misc-syntax">Misc Syntax</h1>
-<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- Partial Application and Function Composition (.)</span><br /><span class="co">-- map :: (a -&gt; b) -&gt; [a] -&gt; [b]</span><br /><span class="ot">toNegative </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]<br />toNegative <span class="fu">=</span> <span class="fu">map</span> (<span class="fu">negate</span> <span class="fu">.</span> <span class="fu">abs</span>)<br /><br /><span class="co">-- Lambda</span><br /><span class="co">-- foldl :: (a -&gt; b -&gt; a) -&gt; a -&gt; [b] -&gt; a</span><br />sumLarge <span class="fu">=</span> <span class="fu">foldl</span> (\acc x <span class="ot">-&gt;</span> <span class="kw">if</span> x <span class="fu">&gt;</span> <span class="dv">50</span> <span class="kw">then</span> acc <span class="fu">+</span> x <span class="kw">else</span> acc) <span class="dv">0</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]<br /><br /><span class="co">-- Function Application ($)</span><br /><span class="co">-- intersperse :: a -&gt; [a] -&gt; [a]</span><br />someNumbers <span class="fu">=</span> intersperse <span class="kw">Nothing</span> <span class="fu">$</span> <span class="fu">map</span> <span class="kw">Just</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]<br /><br /><span class="co">-- Where</span><br />sumMaybes <span class="fu">=</span> <span class="fu">foldl</span> addMaybe <span class="dv">0</span> someNumbers<br />    <span class="kw">where</span> addMaybe <span class="kw">Nothing</span>  <span class="fu">=</span> acc<br />          addMaybe (<span class="kw">Just</span> v) <span class="fu">=</span> acc <span class="fu">+</span> v</code></pre>
+<h1 id="map">Map</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]<br /><span class="fu">map</span> _ []     <span class="fu">=</span> []<br /><span class="fu">map</span> f (x<span class="fu">:</span>xs) <span class="fu">=</span> f x <span class="fu">:</span> <span class="fu">map</span> f xs</code></pre>
 </div>
 <div class="slide">
-<h1 id="part-5-something-practical">Part 5: Something Practical</h1>
+<h1 id="folds">Folds</h1>
+<div class="figure">
+<img src="left-fold.png" /><p class="caption"></p>
+</div>
+<div class="figure">
+<img src="right-fold.png" /><p class="caption"></p>
+</div>
+</div>
+<div class="slide">
+<h1 id="foldr">Foldr</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">foldr</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b<br /><span class="fu">foldr</span> _ z []     <span class="fu">=</span>  z<br /><span class="fu">foldr</span> f z (x<span class="fu">:</span>xs) <span class="fu">=</span>  f x (<span class="fu">foldr</span> f z xs)<br /><br />sum1 <span class="fu">=</span> <span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span><br /><br />try1 <span class="fu">=</span> sum1 veryBigList</code></pre>
+</div>
+<div class="slide">
+<h1 id="foldr-1">Foldr</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><span class="dv">1</span> <span class="fu">+</span> (<span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">2</span><span class="fu">..</span><span class="dv">1000000</span>]) <span class="fu">--&gt;</span><br /><span class="dv">1</span> <span class="fu">+</span> (<span class="dv">2</span> <span class="fu">+</span> (<span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">3</span><span class="fu">..</span><span class="dv">1000000</span>])) <span class="fu">--&gt;</span><br /><span class="dv">1</span> <span class="fu">+</span> (<span class="dv">2</span> <span class="fu">+</span> (<span class="dv">3</span> <span class="fu">+</span> (<span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">4</span><span class="fu">..</span><span class="dv">1000000</span>]))) <span class="fu">--&gt;</span><br /><span class="dv">1</span> <span class="fu">+</span> (<span class="dv">2</span> <span class="fu">+</span> (<span class="dv">3</span> <span class="fu">+</span> (<span class="dv">4</span> <span class="fu">+</span> (<span class="fu">foldr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">5</span><span class="fu">..</span><span class="dv">1000000</span>])))) <span class="fu">--&gt;</span><br /><span class="fu">...</span><br /><span class="dt">Stack</span> <span class="dt">Overflow</span><span class="fu">!</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="foldl">Foldl</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">foldl</span> f z []     <span class="fu">=</span> z<br /><span class="fu">foldl</span> f z (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="kw">let</span> z' <span class="fu">=</span> f z x<br />                   <span class="kw">in</span> <span class="fu">foldl</span> f z' xs<br /><br />sum2 <span class="fu">=</span> <span class="fu">foldl</span> (<span class="fu">+</span>) <span class="dv">0</span><br /><br />try2 <span class="fu">=</span> sum2 veryBigList</code></pre>
+</div>
+<div class="slide">
+<h1 id="foldl-1">Foldl</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">foldl</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><br /><span class="kw">let</span> z1 <span class="fu">=</span>  <span class="dv">0</span> <span class="fu">+</span> <span class="dv">1</span><br /><span class="kw">in</span> <span class="fu">foldl</span> (<span class="fu">+</span>) z1 [<span class="dv">2</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><br /><span class="kw">let</span> z1 <span class="fu">=</span>  <span class="dv">0</span> <span class="fu">+</span> <span class="dv">1</span><br />    z2 <span class="fu">=</span> z1 <span class="fu">+</span> <span class="dv">2</span><br /><span class="kw">in</span> <span class="fu">foldl</span> (<span class="fu">+</span>) z2 [<span class="dv">3</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><br /><span class="kw">let</span> z1 <span class="fu">=</span>  <span class="dv">0</span> <span class="fu">+</span> <span class="dv">1</span><br />    z2 <span class="fu">=</span> z1 <span class="fu">+</span> <span class="dv">2</span><br />    z3 <span class="fu">=</span> z2 <span class="fu">+</span> <span class="dv">3</span><br /><span class="kw">in</span> <span class="fu">foldl</span> (<span class="fu">+</span>) z3 [<span class="dv">4</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><br /><span class="kw">let</span> z1 <span class="fu">=</span>  <span class="dv">0</span> <span class="fu">+</span> <span class="dv">1</span><br />    z2 <span class="fu">=</span> z1 <span class="fu">+</span> <span class="dv">2</span><br />    z3 <span class="fu">=</span> z2 <span class="fu">+</span> <span class="dv">3</span><br />    z4 <span class="fu">=</span> z3 <span class="fu">+</span> <span class="dv">4</span><br /><span class="kw">in</span> <span class="fu">foldl</span> (<span class="fu">+</span>) z4 [<span class="dv">5</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br /><span class="fu">...</span><br /><span class="dt">Stack</span> <span class="dt">Overflow</span><span class="fu">!</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="foldl-2">Foldl'</h1>
+<p>Fold Left Strict</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">seq</span><span class="ot"> </span><span class="ot">::</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b<br /><br /><span class="ot">foldl' </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b<br />foldl' f z []     <span class="fu">=</span> z<br />foldl' f z (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="kw">let</span> z' <span class="fu">=</span> z <span class="ot">`f`</span> x<br />                    <span class="kw">in</span> <span class="fu">seq</span> z' <span class="fu">$</span> foldl' f z' xs</code></pre>
+</div>
+<div class="slide">
+<h1 id="foldl-3">Foldl'</h1>
+<pre class="sourceCode"><code class="sourceCode haskell">foldl' (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br />foldl' (<span class="fu">+</span>) <span class="dv">1</span> [<span class="dv">2</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br />foldl' (<span class="fu">+</span>) <span class="dv">3</span> [<span class="dv">3</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br />foldl' (<span class="fu">+</span>) <span class="dv">6</span> [<span class="dv">4</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span><br />foldl' (<span class="fu">+</span>) <span class="dv">10</span> [<span class="dv">5</span><span class="fu">..</span><span class="dv">1000000</span>] <span class="fu">--&gt;</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="lambdas">Lambdas</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span> (\x <span class="ot">-&gt;</span> x <span class="fu">*</span> x) [<span class="dv">1</span><span class="fu">..</span><span class="dv">20</span>]<br /><br />sumLarge <span class="fu">=</span> <span class="fu">foldl</span> (\acc x <span class="ot">-&gt;</span> <span class="kw">if</span> x <span class="fu">&gt;</span> <span class="dv">50</span> <span class="kw">then</span> acc <span class="fu">+</span> x <span class="kw">else</span> acc) <span class="dv">0</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]</code></pre>
+</div>
+<div class="slide">
+<h1 id="function-application">Function Application</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">($) </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b<br />f <span class="fu">$</span> x <span class="fu">=</span> f x<br /><br /><span class="co">-- intersperse :: a -&gt; [a] -&gt; [a]</span><br />someNumbers <span class="fu">=</span> intersperse <span class="kw">Nothing</span> <span class="fu">$</span> <span class="fu">map</span> <span class="kw">Just</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]</code></pre>
+</div>
+<div class="slide">
+<h1 id="partial-application">Partial Application</h1>
+<p>The traditional way to think of map:</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]<br /><br /><span class="fu">map</span> (\x <span class="ot">-&gt;</span> x <span class="fu">*</span> x) [<span class="dv">1</span><span class="fu">..</span><span class="dv">20</span>]</code></pre>
+<p>What if I only give it a function?</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [b])<br /><br /><span class="fu">map</span> (\x <span class="ot">-&gt;</span> x <span class="fu">*</span> x)</code></pre>
+<p>Double Partial Application!</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span> (<span class="fu">*</span><span class="dv">10</span>)</code></pre>
+</div>
+<div class="slide">
+<h1 id="currying">Currying</h1>
+<p>All Haskell functions only take 1 argument, partially apply it, and then return more functions which take the next argument.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">add </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a     <span class="co">-- these type defitions</span><br /><span class="ot">add </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> a)   <span class="co">-- are the same</span><br />add arg1 arg2 <span class="fu">=</span> arg1 <span class="fu">+</span> arg2<br /><br /><span class="ot">plustwo </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a<br />plustwo <span class="fu">=</span> add <span class="dv">2</span><br /><br /><span class="ot">five </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a<br />five <span class="fu">=</span> add <span class="dv">2</span> <span class="dv">3</span>                    <span class="co">-- functionally the same as</span><br />five <span class="fu">=</span> (add <span class="dv">2</span>) <span class="dv">3</span>                  <span class="co">-- using the parens</span><br /><br /><span class="ot">myFun </span><span class="ot">::</span> a <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> (c <span class="ot">-&gt;</span> (d <span class="ot">-&gt;</span> e)))<br />myFun w x y z <span class="fu">=</span> <span class="fu">...</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="function-composition">Function Composition</h1>
+<p>Same Function Composition (f o g)(x) from high school algebra.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">(.) </span><span class="ot">::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> c)<br />f <span class="fu">.</span> g <span class="fu">=</span> \x <span class="ot">-&gt;</span> f (g x)<br /><br /><span class="ot">toNegative </span><span class="ot">::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]<br />toNegative <span class="fu">=</span> <span class="fu">map</span> (<span class="fu">negate</span> <span class="fu">.</span> <span class="fu">abs</span>)</code></pre>
+</div>
+<div class="slide">
+<h1 id="flip">Flip</h1>
+<p>Switch the order of the arguments of a function.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">flip</span><span class="ot"> </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c)<br /><span class="fu">flip</span> f x y <span class="fu">=</span> f y x</code></pre>
+</div>
+<div class="slide">
+<h1 id="part-5-intermission-for-something-practical">Part 5: Intermission for Something Practical</h1>
 </div>
 <div class="slide">
 <h1 id="red-black-tree-overview">Red Black Tree Overview</h1>
@@ -714,13 +831,113 @@ Alex Burkhart
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">balance </span><span class="ot">::</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> a<br />balance (<span class="dt">Tree</span> <span class="dt">Black</span> (<span class="dt">Tree</span> <span class="dt">Red</span> (<span class="dt">Tree</span> <span class="dt">Red</span> a x b) y c) z d) <span class="fu">=</span><br /><br />balance (<span class="dt">Tree</span> <span class="dt">Black</span> (<span class="dt">Tree</span> <span class="dt">Red</span> a x (<span class="dt">Tree</span> <span class="dt">Red</span> b y c)) z d) <span class="fu">=</span><br /><br />balance (<span class="dt">Tree</span> <span class="dt">Black</span> a x (<span class="dt">Tree</span> <span class="dt">Red</span> (<span class="dt">Tree</span> <span class="dt">Red</span> b y c) z d)) <span class="fu">=</span><br /><br />balance (<span class="dt">Tree</span> <span class="dt">Black</span> a x (<span class="dt">Tree</span> <span class="dt">Red</span> b y (<span class="dt">Tree</span> <span class="dt">Red</span> c z d))) <span class="fu">=</span><br /><br />        <span class="dt">Tree</span> <span class="dt">Red</span> (<span class="dt">Tree</span> <span class="dt">Black</span> a x b) y (<span class="dt">Tree</span> <span class="dt">Black</span> c z d)<br /><br />balance t <span class="fu">=</span> t</code></pre>
 </div>
 <div class="slide">
-<h1 id="map">Map</h1>
+<h1 id="tree-map">Tree Map</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">tmap </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b<br />tmap _ <span class="dt">Empty</span> <span class="fu">=</span> <span class="dt">Empty</span><br />tmap f (<span class="dt">Tree</span> color a y b) <span class="fu">=</span> <span class="dt">Tree</span> color (tmap f a) (f y) (tmap f b)</code></pre>
+</div>
+<div class="slide">
+<h1 id="tree-map-1">Tree Map</h1>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">isomap </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b<br />isomap _ <span class="dt">Empty</span> <span class="fu">=</span> <span class="dt">Empty</span><br />isomap f (<span class="dt">Tree</span> color a y b) <span class="fu">=</span> <span class="dt">Tree</span> color (isomap f a) (f y) (isomap f b)<br /><br /><span class="ot">nonisomap </span><span class="ot">::</span> (<span class="kw">Ord</span> a, <span class="kw">Ord</span> b) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b<br />nonisomap _ <span class="dt">Empty</span> <span class="fu">=</span> <span class="dt">Empty</span><br />nonisomap f t <span class="fu">=</span> fromList <span class="fu">$</span> <span class="fu">map</span> f <span class="fu">$</span> toList t</code></pre>
+</div>
+<div class="slide">
+<h1 id="smaller-practical-interlude-b">Smaller Practical Interlude B</h1>
+<p>Someone was wondering how a &quot;pure&quot; language like Haskell handles I/O.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- echo first argument</span><br /><br /><span class="ot">main </span><span class="ot">::</span> <span class="dt">IO</span> ()<br />main <span class="fu">=</span> <span class="fu">putStr</span> (<span class="fu">head</span> getArgs)</code></pre>
+<p>I'm not ready to explain how this works. Soon.</p>
+</div>
+<div class="slide">
+<h1 id="smaller-practical-interlude-c">Smaller Practical Interlude C</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- print out the response from an HTTP request</span><br /><br /><span class="ot">main </span><span class="ot">::</span> <span class="dt">IO</span> ()<br />main <span class="fu">=</span> <span class="kw">do</span><br />  (url<span class="fu">:</span>_) <span class="ot">&lt;-</span> getArgs       <span class="co">-- Sets url to first command-line argument</span><br />  page <span class="ot">&lt;-</span> simpleHttp url   <span class="co">-- Sets page to contents as a ByteString</span><br />  <span class="fu">putStr</span> (L.toString page) <span class="co">-- Converts ByteString to String and prints it</span></code></pre>
+<p>Magic! But that is the style of the magic.</p>
+</div>
+<div class="slide">
+<h1 id="part-6-more-crazy-haskell">Part 6: More Crazy Haskell!</h1>
+</div>
+<div class="slide">
+<h1 id="list-comprehensions">List Comprehensions</h1>
+<p>Write &quot;Set-Builder&quot; notation to create lists.</p>
+<pre class="sourceCode"><code class="sourceCode haskell">evens <span class="fu">=</span> [ n <span class="fu">|</span> n <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>], <span class="fu">even</span> n ]<br /><br />squares <span class="fu">=</span> [ x <span class="fu">*</span> x <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>]]<br /><br />powerset <span class="fu">=</span> [ (x,y) <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">4</span>], y <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">4</span>]]<br /><br />variableName <span class="fu">=</span> [ this_var_goes_in_list <span class="fu">|</span> define_your_var, add_some_conditions, more_conditions ]</code></pre>
+</div>
+<div class="slide">
+<h1 id="record-syntax">Record Syntax</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Config</span> a b <span class="fu">=</span> <span class="dt">Conf</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">String</span> <span class="dt">String</span> a <span class="dt">String</span> b <span class="dt">String</span> b<br /><br /><span class="ot">f </span><span class="ot">::</span> <span class="dt">Config</span> <span class="dt">Color</span> [<span class="fu">FilePath</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />f (<span class="dt">Config</span> _ _ _ _ _ p _ _ _) <span class="fu">=</span> hackEverything p</code></pre>
+<p>What?</p>
+<p>Better comment the shit out of that thing...</p>
+</div>
+<div class="slide">
+<h1 id="record-syntax-1">Record Syntax</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Config</span> a b <span class="fu">=</span> <span class="dt">Conf</span> {<span class="ot"> name </span><span class="ot">::</span> <span class="dt">String</span><br />                       ,<span class="ot"> version </span><span class="ot">::</span> <span class="dt">String</span><br />                       ,<span class="ot"> ip </span><span class="ot">::</span> <span class="dt">String</span><br />                       ,<span class="ot"> count </span><span class="ot">::</span> <span class="dt">Int</span><br />                       ,<span class="ot"> magic </span><span class="ot">::</span> a<br />                       ,<span class="ot"> password </span><span class="ot">::</span> <span class="dt">String</span><br />                       ,<span class="ot"> incantationSequence </span><span class="ot">::</span> b<br />                       ,<span class="ot"> referrer </span><span class="ot">::</span> <span class="dt">String</span><br />                       ,<span class="ot"> inCaseOfFire </span><span class="ot">::</span> b }</code></pre>
+<p>Creates functions for each field of the appropriate type.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- generated</span><br /><span class="ot">password </span><span class="ot">::</span> <span class="dt">Config</span> a b <span class="ot">-&gt;</span> <span class="dt">String</span><br />password (<span class="dt">Config</span> _ _ _ _ _ p _ _ _) <span class="fu">=</span> p<br /><br /><span class="ot">f </span><span class="ot">::</span> <span class="dt">Config</span> <span class="dt">Color</span> [<span class="fu">FilePath</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />f (<span class="dt">Config</span> {password <span class="fu">=</span> p}) <span class="fu">=</span> hackEverything p</code></pre>
+</div>
+<div class="slide">
+<h1 id="defining-datatypes---type">Defining DataTypes - type</h1>
+<p>Type Alias. Strictly a documentation convienence. A type &quot;nickname&quot;.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">String</span> <span class="fu">=</span> [<span class="dt">Char</span>]<br /><br /><span class="kw">type</span> <span class="fu">FilePath</span> <span class="fu">=</span> <span class="dt">String</span><br /><br /><span class="kw">type</span> <span class="dt">Rational</span> <span class="fu">=</span> <span class="dt">Ratio</span> <span class="dt">Integer</span></code></pre>
+<p>Completely interchangable with the aliased &quot;data&quot; type.</p>
+<p>Used almost everywhere a normal &quot;data&quot; type could be used (exception being typeclass instance declaration).</p>
+</div>
+<div class="slide">
+<h1 id="defining-datatypes---newtype">Defining DataTypes - newtype</h1>
+<p>Renames existing type and provides a new constructor. Stripped away at compile time. Hide the underlying type.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">UniqueID</span> <span class="fu">=</span> <span class="dt">UniqueID</span> <span class="dt">Int</span> <span class="kw">deriving</span> (<span class="kw">Eq</span>)</code></pre>
+<p>No runtime overhead!</p>
+<p>Exactly one field and exactly one constructor!</p>
+<p>Not interchangable with the hidden/underlying &quot;data&quot; type. Compile Error!</p>
+<p>Used everywhere a normal &quot;data&quot; type could be used (<em>including</em> being typeclass instance declaration).</p>
+</div>
+<div class="slide">
+<h1 id="kinds">Kinds</h1>
+<p>Kinds describe Types just like Types describe Values. We care about how many type parameters are left to be locked in for this type.</p>
+<p>We can use GHCi to query about the Kind of a Type. *'s correlate to type parameters.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- Int is finished. No additional type parameters.</span><br /><span class="fu">:</span>k <span class="dt">Int</span><br /><span class="dt">Int</span><span class="ot"> </span><span class="ot">::</span> <span class="fu">*</span><br /><br /><span class="co">-- Maybe isn't finished. We still need the inside type.</span><br /><span class="fu">:</span>k <span class="dt">Maybe</span><br /><span class="dt">Maybe</span><span class="ot"> </span><span class="ot">::</span> <span class="fu">*</span> <span class="ot">-&gt;</span> <span class="fu">*</span><br /><br /><span class="fu">:</span>k <span class="dt">Maybe</span> <span class="dt">Int</span><br /><span class="dt">Maybe</span> <span class="dt">Int</span><span class="ot"> </span><span class="ot">::</span> <span class="fu">*</span><br /><br /><span class="fu">:</span>k <span class="dt">Either</span><br /><span class="dt">Either</span><span class="ot"> </span><span class="ot">::</span> <span class="fu">*</span> <span class="ot">-&gt;</span> <span class="fu">*</span> <span class="ot">-&gt;</span> <span class="fu">*</span><br /><br /><span class="fu">:</span>k <span class="dt">Either</span> <span class="dt">String</span><br /><span class="dt">Either</span> <span class="dt">String</span><span class="ot"> </span><span class="ot">::</span> <span class="fu">*</span> <span class="ot">-&gt;</span> <span class="fu">*</span></code></pre>
+<p>Kinds are useful when thinking about higher order types.</p>
+</div>
+<div class="slide">
+<h1 id="part-7-cool-abstractions">Part 7: Cool Abstractions</h1>
+</div>
+<div class="slide">
+<h1 id="generalizing-map">Generalizing Map</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot">          </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]<br /><br /><span class="ot">tmap         </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b<br /><br /><span class="ot">applyToMaybe </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Either</span> a c <span class="ot">-&gt;</span> <span class="dt">Either</span> b c<br /><span class="ot">applyToRight </span><span class="ot">::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> <span class="dt">Either</span> a b <span class="ot">-&gt;</span> <span class="dt">Either</span> a c<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a,c) <span class="ot">-&gt;</span> (b,c)<br /><span class="ot">applyToRight </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (c,a) <span class="ot">-&gt;</span> (c,b)</code></pre>
+</div>
+<div class="slide">
+<h1 id="generalizing-map-1">Generalizing Map</h1>
+<p>Think of this as a tranformation of a function.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot">          </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [b])<br /><br /><span class="ot">tmap         </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b)<br /><br /><span class="ot">applyToMaybe </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b)<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">Either</span> a c <span class="ot">-&gt;</span> <span class="dt">Either</span> b c)<br /><span class="ot">applyToRight </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (<span class="dt">Either</span> c a <span class="ot">-&gt;</span> <span class="dt">Either</span> c b)<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ((a,c) <span class="ot">-&gt;</span> (b,c))<br /><span class="ot">applyToRight </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ((c,a) <span class="ot">-&gt;</span> (c,b))</code></pre>
+<p>You'll hear this referred to as <strong><em>Lifting: a concept which allows you to transform a function into a corresponding function within another setting.</em></strong></p>
+</div>
+<div class="slide">
+<h1 id="functors">Functors</h1>
+<p>Generalize this transformation into a typeclass called a Functor.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="kw">Functor</span> a <span class="kw">where</span><br /><span class="ot">  fmap </span><span class="ot">::</span> <span class="kw">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> [] <span class="kw">where</span><br />  <span class="fu">fmap</span> _ [] <span class="fu">=</span> []<br />  <span class="fu">fmap</span> g (x<span class="fu">:</span>xs) <span class="fu">=</span> g x <span class="fu">:</span> <span class="fu">fmap</span> g xs<br /><span class="co">-- or, fmap = map</span><br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> <span class="dt">Tree</span> <span class="kw">where</span><br />  <span class="fu">fmap</span> <span class="fu">=</span> tmap<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> <span class="dt">Maybe</span> <span class="kw">where</span><br />  <span class="fu">fmap</span> _ <span class="kw">Nothing</span> <span class="fu">=</span> <span class="kw">Nothing</span><br />  <span class="fu">fmap</span> g (<span class="kw">Just</span> x) <span class="fu">=</span> <span class="kw">Just</span> <span class="fu">$</span> g x<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> (<span class="dt">Either</span> e) <span class="kw">where</span><br />  <span class="fu">fmap</span> _ (<span class="kw">Left</span> err) <span class="fu">=</span> <span class="kw">Left</span> err<br />  <span class="fu">fmap</span> g (<span class="kw">Right</span> x ) <span class="fu">=</span> <span class="kw">Right</span> <span class="fu">$</span> g x<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> ((,) e) <span class="kw">where</span> <span class="co">-- think of this as &quot;(e,)&quot;</span><br />  <span class="fu">fmap</span> g (x,y) <span class="fu">=</span> (g x, y)<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> ((<span class="ot">-&gt;</span>) e) <span class="kw">where</span>  <span class="co">-- think of this as &quot;(e -&gt; a)&quot;</span><br />  <span class="fu">fmap</span> g <span class="fu">=</span> \e <span class="ot">-&gt;</span> g e</code></pre>
+<p>List is a Functor, Maybe is a Functor, Either is a Functor, Tuples are Functors. Many types qualify.</p>
+</div>
+<div class="slide">
+<h1 id="functor-usage">Functor Usage</h1>
+</div>
+<div class="slide">
+<h1 id="functor-laws">Functor Laws</h1>
+<p>Instances of Functor should satisfy the following laws:</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">fmap</span> <span class="fu">id</span>  <span class="fu">==</span>  <span class="fu">id</span><br /><span class="fu">fmap</span> (f <span class="fu">.</span> g)  <span class="fu">==</span>  <span class="fu">fmap</span> f <span class="fu">.</span> <span class="fu">fmap</span> g<br /><br /><span class="co">-- Evil Functor instance</span><br /><span class="kw">instance</span> <span class="kw">Functor</span> [] <span class="kw">where</span><br />  <span class="fu">fmap</span> _ [] <span class="fu">=</span> []<br />  <span class="fu">fmap</span> g (x<span class="fu">:</span>xs) <span class="fu">=</span> g x <span class="fu">:</span> g x <span class="fu">:</span> <span class="fu">fmap</span> g xs</code></pre>
+</div>
+<div class="slide">
+<h1 id="functor-of-functions-trouble">Functor of Functions == Trouble</h1>
+</div>
+<div class="slide">
+<h1 id="applicative-functors">Applicative Functors</h1>
+</div>
+<div class="slide">
+<h1 id="applicative-functor-example-source">Applicative Functor Example Source</h1>
+</div>
+<div class="slide">
+<h1 id="usage-of-applicative-functors">Usage of Applicative Functors</h1>
 </div>
 <div class="slide">
 <h1 id="future-topics">Future Topics</h1>
 <ul>
-<li><code>newtype'',</code>type'', ($), and Record Syntax</li>
+<li>Monads</li>
+<li>Common Monads (I/O, Reader, Writer, State)</li>
+<li>MonadTransformers and MonadPlus</li>
+<li>Arrows</li>
 <li>Numeric Type Heirarchy and ByteStrings</li>
 <li>Parser Combinators</li>
 <li>Category Theory and Advanced Types</li>
@@ -729,10 +946,6 @@ Alex Burkhart
 <li>Zippers</li>
 <li>Finger Trees (will blow your mind)</li>
 </ul></li>
-<li>Monads</li>
-<li>Common Monads (I/O, Reader, Writer, State)</li>
-<li>MonadTransformers and MonadPlus</li>
-<li>Arrows</li>
 </ul>
 </div>
 <div class="slide">
@@ -760,8 +973,12 @@ Alex Burkhart
 <h1 id="credits">Credits</h1>
 <ul>
 <li>Sweet GPL Red Black Tree Diagram: en:User:Cburnett</li>
+<li>Fold Images: http://www.haskell.org/haskellwiki/Fold</li>
 <li>Slides format: Bryan O'Sullivan</li>
-<li>Numerous Examples: Learn You a Haskell for Great Good!</li>
+<li>The Great Fold Examples:</li>
+<li>Learn You a Haskell for Great Good! http://www.haskell.org/haskellwiki/Foldr_Foldl_Foldl%27</li>
+<li>Bryan O'Sullivan http://www.scs.stanford.edu/11au-cs240h/notes/</li>
+<li>Mark Lentczner https://github.com/mtnviewmark/haskell-amuse-bouche/blob/master/slides.md</li>
 </ul>
 </div>
 </body>
