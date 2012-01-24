@@ -555,11 +555,20 @@ map _ []     = []
 map f (x:xs) = f x : map f xs
 ~~~~
 
-# Folds
+
+# Foldl
+
+~~~~ {.haskell}
+foldl f z []     = z
+foldl f z (x:xs) = let z' = f z x
+                   in foldl f z' xs
+
+sum2 = foldl (+) 0
+
+try2 = sum2 veryBigList
+~~~~
 
 ![](left-fold.png)
-
-![](right-fold.png)
 
 # Foldr
 
@@ -573,6 +582,8 @@ sum1 = foldr (+) 0
 try1 = sum1 veryBigList
 ~~~~
 
+![](right-fold.png)
+
 # Foldr
 
 ~~~~ {.haskell}
@@ -583,18 +594,6 @@ foldr (+) 0 [1..1000000] -->
 1 + (2 + (3 + (4 + (foldr (+) 0 [5..1000000])))) -->
 ...
 Stack Overflow!
-~~~~
-
-# Foldl
-
-~~~~ {.haskell}
-foldl f z []     = z
-foldl f z (x:xs) = let z' = f z x
-                   in foldl f z' xs
-
-sum2 = foldl (+) 0
-
-try2 = sum2 veryBigList
 ~~~~
 
 # Foldl
@@ -979,12 +978,14 @@ how many type parameters are left to be locked in for this type.
 We can use GHCi to query about the Kind of a Type. *'s correlate to type
 parameters.
 
+Roughly speaking, the type of a type.
+
 ~~~~ {.haskell}
--- Int is finished. No additional type parameters.
+-- Int is fully applied. No additional type parameters.
 :k Int
 Int :: *
 
--- Maybe isn't finished. We still need the inside type.
+-- Maybe isn't fully applied. Think of it as a type-function.
 :k Maybe
 Maybe :: * -> *
 
@@ -1004,6 +1005,9 @@ Kinds are useful when thinking about higher order types.
 
 # Generalizing Map
 
+Map takes a function and a "container", apply that function to the
+value contained inside.
+
 ~~~~ {.haskell}
 map          :: (a -> b) -> [a] -> [b]
 
@@ -1018,9 +1022,18 @@ applyToLeft  :: (a -> b) -> (a,c) -> (b,c)
 applyToRight :: (a -> b) -> (c,a) -> (c,b)
 ~~~~
 
+More generally...
+
+~~~~ {.haskell}
+newtype Container t = Container t
+
+mapContainer :: (a -> b) -> Container a -> Container b
+~~~~
+
 # Generalizing Map
 
-Think of this as a tranformation of a function.
+Think of this as a tranformation of a function to operate in a new
+context.
 
 ~~~~ {.haskell}
 map          :: (a -> b) -> ([a] -> [b])
@@ -1031,9 +1044,12 @@ applyToMaybe :: (a -> b) -> (Maybe a -> Maybe b)
 
 applyToLeft  :: (a -> b) -> (Either a c -> Either b c)
 applyToRight :: (a -> b) -> (Either c a -> Either c b)
+~~~~
 
-applyToLeft  :: (a -> b) -> ((a,c) -> (b,c))
-applyToRight :: (a -> b) -> ((c,a) -> (c,b))
+~~~~ {.haskell}
+newtype Context t = Context t
+
+mapContext :: (a -> b) -> (Context a -> Context b)
 ~~~~
 
 You'll hear this referred to as ***Lifting: a concept which allows you
@@ -1045,18 +1061,68 @@ setting.***
 
 Generalize this transformation into a typeclass called a Functor.
 
+Functors are parameterized by f, which is a type of kind "* -> *".
+
 ~~~~ {.haskell}
-class Functor a where
+class Functor f where
   fmap :: Functor f => (a -> b) -> f a -> f b
 
 instance Functor [] where
   fmap _ [] = []
   fmap g (x:xs) = g x : fmap g xs
--- or, fmap = map
+~~~~
+
+But why reimplement that? We can just assign the unapplied functions!
+
+~~~~ {.haskell}
+instance Functor [] where
+  fmap = map
 
 instance Functor Tree where
   fmap = tmap
+~~~~
 
+# Functor Usage
+
+~~~~ {.haskell}
+toUpper :: Char -> Char
+
+capitalize :: (Functor f) => f Char -> f Char
+capitalize = fmap toUpper
+
+ghci> capitalize "abcedfg"
+=> "ABCEDFG"
+~~~~
+
+# Functor Laws
+
+Instances of Functor should satisfy the following laws:
+
+Identity:
+
+~~~~ {.haskell}
+fmap id  ==  id
+~~~~
+
+Composition:
+
+~~~~ {.haskell}
+fmap (f . g)  ==  fmap f . fmap g
+~~~~
+
+Evil Functor Instance:
+
+~~~~ {.haskell}
+instance Functor [] where
+  fmap _ [] = []
+  fmap g (x:xs) = g x : g x : fmap g xs
+~~~~
+
+# Functors as Containers
+
+Beyond lists: Functors as the container metaphor.
+
+~~~~ {.haskell}
 instance Functor Maybe where
   fmap _ Nothing = Nothing
   fmap g (Just x) = Just $ g x
@@ -1064,31 +1130,84 @@ instance Functor Maybe where
 instance Functor (Either e) where
   fmap _ (Left err) = Left err
   fmap g (Right x ) = Right $ g x
-
-instance Functor ((,) e) where -- think of this as "(e,)"
-  fmap g (x,y) = (g x, y)
-
-instance Functor ((->) e) where  -- think of this as "(e -> a)"
-  fmap g = \e -> g e
 ~~~~
 
-List is a Functor, Maybe is a Functor, Either is a Functor, Tuples are
-Functors. Many types qualify.
+Think of this as the partially applied type "(e,)". We needed a Kind
+of "* -> *" for it to be a Functor instance.
+
+~~~~ {.haskell}
+instance Functor ((,) e) where
+  fmap g (x,y) = (g x, y)
+~~~~
 
 # Functor Usage
 
-# Functor Laws
+~~~~ {.haskell}
+possiblyDouble :: (Num a, Functor f) => f a -> f a
+possiblyDouble = fmap (*2)
 
-Instances of Functor should satisfy the following laws:
+val1 = Just 12
+val2 = Nothing
+
+ghci> possiblyDouble val1
+=> Just 24
+
+ghci> possiblyDouble val2
+=> Nothing
+
+val3 = Left "DANGER!"
+val4 = Right 404
+
+ghci> possiblyDouble val3
+=> Left "DANGER!"
+
+ghci> possiblyDouble val4
+=> Right 808
+
+~~~~
+
+# Functors as a Context
+
+Functions are functors.   o.O
+
+Haskell is all about viewing programs as "transformations of
+data". Functions are first class data types. We can view Functors as
+"transformations of functions".
+
+Think of this type as "(e -> a), which is a function which takes an argument".
 
 ~~~~ {.haskell}
-fmap id  ==  id
-fmap (f . g)  ==  fmap f . fmap g
+instance Functor ((->) e) where
+  fmap :: ??
+  fmap g h = \x -> g (h x)
+~~~~
 
--- Evil Functor instance
-instance Functor [] where
-  fmap _ [] = []
-  fmap g (x:xs) = g x : g x : fmap g xs
+The type reveals all!
+
+# Functors
+
+Let's break this down.
+
+~~~~ {.haskell}
+instance Functor ((->) e) where
+  fmap :: (b -> c) -> (a -> b) -> (a -> c)
+  fmap g h = \x -> g (h x)
+~~~~
+
+Look's familar...
+
+~~~~ {.haskell}
+instance Functor ((->) e) where
+  fmap :: (b -> c) -> (a -> b) -> (a -> c)
+  fmap g h = g . h
+~~~~
+
+Why bother applying args in that case?
+
+~~~~ {.haskell}
+instance Functor ((->) e) where
+  fmap :: (b -> c) -> (a -> b) -> (a -> c)
+  fmap = (.)
 ~~~~
 
 # Functor of Functions == Trouble
