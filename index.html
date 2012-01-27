@@ -613,7 +613,7 @@ Alex Burkhart
 </div>
 <div class="slide">
 <h1 id="without-pattern-matching">Without Pattern Matching</h1>
-<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">isRed </span><span class="ot">::</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />isRed c <span class="fu">=</span> <span class="kw">if</span> c <span class="fu">==</span> <span class="dt">Red</span><br />          <span class="kw">then</span> <span class="kw">True</span><br />          <span class="kw">else</span> <span class="kw">if</span> c <span class="fu">==</span> <span class="fu">Blue...</span></code></pre>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">isRed </span><span class="ot">::</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />isRed c <span class="fu">=</span> <span class="kw">if</span> c <span class="fu">==</span> <span class="dt">Red</span><br />          <span class="kw">then</span> <span class="kw">True</span><br />          <span class="kw">else</span> <span class="kw">False</span></code></pre>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">equals </span><span class="ot">::</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Color</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />equals x y <span class="fu">=</span> <span class="kw">if</span> (x <span class="fu">==</span> <span class="dt">Red</span> <span class="fu">&amp;&amp;</span> y <span class="fu">==</span> <span class="dt">Red</span>) <span class="fu">||</span> (x <span class="fu">==</span> <span class="fu">Blue...</span></code></pre>
 </div>
 <div class="slide">
@@ -894,6 +894,72 @@ Alex Burkhart
 <h1 id="part-7-cool-abstractions">Part 7: Cool Abstractions</h1>
 </div>
 <div class="slide">
+<h1 id="introduction-to-abstraction">Introduction to Abstraction</h1>
+<p>So let's review a couple of terms from Math class:</p>
+<ul>
+<li><p><strong>binary operation</strong>: a function which takes two arguments. let's call it *.</p></li>
+<li><p><strong>identity</strong>: an element, I, where I * a === a, or &quot;Does not change our result&quot;</p></li>
+<li><p><strong>associativity</strong>: a * (b * c) === (a * b) * c, or &quot;Order Applied&quot;</p></li>
+<li><p><strong>commutativity</strong>: a * b === b * a, or &quot;Argument Order&quot;</p></li>
+</ul>
+<p>Why do you care?</p>
+</div>
+<div class="slide">
+<h1 id="monoids">Monoids</h1>
+<p>First of the simple Haskell typeclasses named after scary Math stuff.</p>
+<p>Almost stupidly simple.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> a <span class="kw">where</span><br /><span class="ot">  mempty </span><span class="ot">::</span> a                 <span class="co">-- identity</span><br /><span class="ot">  mappend </span><span class="ot">::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a      <span class="co">-- an associative binary op</span></code></pre>
+<p>So many types from all programming languages are Monoids. You just didn't know it.</p>
+<ul>
+<li>Lists under concatenation (++)</li>
+<li>Numbers under Addition or Multiplication (+), (*)</li>
+<li>Booleans under Conjunction or Disjunction (all, any)</li>
+<li>Sets under Union or Intersection (||, &amp;&amp;)</li>
+<li>Functions from a type to itself, under Composition (.)</li>
+</ul>
+</div>
+<div class="slide">
+<h1 id="monoids-1">Monoids</h1>
+<p>Monoid's type parameter, m, is a type of kind &quot;*&quot; (a fully applied type).</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> m <span class="kw">where</span><br /><span class="ot">  mempty </span><span class="ot">::</span> m                 <span class="co">-- identity</span><br /><span class="ot">  mappend </span><span class="ot">::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m      <span class="co">-- an associative binary op</span><br /><span class="ot">  mconcat </span><span class="ot">::</span> [m] <span class="ot">-&gt;</span> m         <span class="co">-- optional, can be defined entirely in</span><br />                              <span class="co">-- terms of mappend otherwise</span></code></pre>
+<p>Why do we care?</p>
+<p>This is a pattern you see across many things since so many things &quot;qualify&quot; as a Monoid.</p>
+</div>
+<div class="slide">
+<h1 id="monoids-2">Monoids</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> m <span class="kw">where</span><br /><span class="ot">  mempty </span><span class="ot">::</span> m                 <span class="co">-- identity</span><br /><span class="ot">  mappend </span><span class="ot">::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m      <span class="co">-- an associative binary op</span><br /><span class="ot">  mconcat </span><span class="ot">::</span> [m] <span class="ot">-&gt;</span> m         <span class="co">-- optional, can be defined entirely in</span><br />                              <span class="co">-- terms of mappend otherwise</span></code></pre>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Monoid</span> [] <span class="kw">where</span><br /><span class="ot">  mempty </span><span class="ot">::</span> []<br />  mempty <span class="fu">=</span> []<br /><br /><span class="ot">  mappend </span><span class="ot">::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m<br />  mappend <span class="fu">=</span> (<span class="fu">++</span>)<br /><br /><span class="ot">  mconcat </span><span class="ot">::</span> [m] <span class="ot">-&gt;</span> m<br />  mconcat <span class="fu">=</span> <span class="fu">foldr</span> mappend mempty</code></pre>
+</div>
+<div class="slide">
+<h1 id="monoid-laws">Monoid Laws</h1>
+<p>We can actually express the qualities of Monoids in Haskell notation, which we can then test later using QuickCheck.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- check the identity property of mempty</span><br /><span class="ot">leftIdentity </span><span class="ot">::</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />leftIdentity x <span class="fu">=</span> mempty <span class="ot">`mappend`</span> x <span class="fu">==</span> x<br /><br /><span class="ot">rightIdentity </span><span class="ot">::</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />rightIdentity x <span class="fu">=</span> x <span class="ot">`mappend`</span> mempty <span class="fu">=</span> x<br /><br /><span class="co">-- check associativity of mappend</span><br /><span class="ot">associativity </span><span class="ot">::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span><br />associativity x y z <span class="fu">=</span> (x <span class="ot">`mappend`</span> y) <span class="ot">`mappend`</span> z <span class="fu">==</span> x <span class="ot">`mappend`</span> (y <span class="ot">`mappend`</span> z)</code></pre>
+<p>That's it!</p>
+</div>
+<div class="slide">
+<h1 id="numbers">Numbers</h1>
+<p>So Numbers are Monoids with using both the Addition and Multiplication operations.</p>
+<p>We can separate these by wrapping your number in a newtype wrapper.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Sum</span> a <span class="fu">=</span> <span class="dt">Sum</span> {<span class="ot"> getSum </span><span class="ot">::</span> a }<br /><br /><span class="kw">newtype</span> <span class="dt">Product</span> a <span class="fu">=</span> <span class="dt">Product</span> {<span class="ot"> getProduct </span><span class="ot">::</span> a }</code></pre>
+<p>We can then separately define Monoid instances for each of these newtypes.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> (<span class="kw">Num</span> a ) <span class="ot">=&gt;</span> (<span class="dt">Monoid</span> <span class="dt">Sum</span>) <span class="kw">where</span><br />  mempty <span class="fu">=</span> <span class="dt">Sum</span> <span class="dv">0</span><br />  mappend (<span class="dt">Sum</span> x) (<span class="dt">Sum</span> y) <span class="fu">=</span> <span class="dt">Sum</span> <span class="fu">$</span> x <span class="fu">+</span> y<br /><br /><span class="kw">instance</span> (<span class="kw">Num</span> a ) <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">Product</span> a) <span class="kw">where</span><br />  mempty <span class="fu">=</span> <span class="dt">Sum</span> <span class="dv">1</span><br />  mappend (<span class="dt">Product</span> x) (<span class="dt">Product</span> y) <span class="fu">=</span> <span class="dt">Product</span> <span class="fu">$</span> x <span class="fu">*</span> y</code></pre>
+<p>We can do the same thing for Bool's using newtype wrappers Any and All for set conjunction and disjunction.</p>
+</div>
+<div class="slide">
+<h1 id="monoid-recap">Monoid Recap</h1>
+<p>The simplest of the (very) abstract type classes.</p>
+<p>Usefulness? fold* can be defined in terms of &quot;mempty&quot; and &quot;mappend&quot;.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">foldl</span><span class="ot"> </span><span class="ot">::</span> (<span class="dt">Monoid</span> a) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a</code></pre>
+<p>Very few requirements, all sorts of types are Monoids.</p>
+<p>Can be extended in usefulness by defining CommutativeMonoids, which requires commutativity of the type, where the result changes when changing the argument order.</p>
+<p>Commutative Monoids:</p>
+<ul>
+<li><p>Lists</p></li>
+<li><p>Functions</p></li>
+<li><p>Matrices</p></li>
+</ul>
+</div>
+<div class="slide">
 <h1 id="generalizing-map">Generalizing Map</h1>
 <p>Map takes a function and a &quot;container&quot;, apply that function to the value contained inside.</p>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="fu">map</span><span class="ot">          </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]<br /><br /><span class="ot">tmap         </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b<br /><br /><span class="ot">applyToMaybe </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Either</span> a c <span class="ot">-&gt;</span> <span class="dt">Either</span> b c<br /><span class="ot">applyToRight </span><span class="ot">::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> <span class="dt">Either</span> a b <span class="ot">-&gt;</span> <span class="dt">Either</span> a c<br /><br /><span class="ot">applyToLeft  </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a,c) <span class="ot">-&gt;</span> (b,c)<br /><span class="ot">applyToRight </span><span class="ot">::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (c,a) <span class="ot">-&gt;</span> (c,b)</code></pre>
@@ -910,7 +976,7 @@ Alex Burkhart
 <div class="slide">
 <h1 id="functors">Functors</h1>
 <p>Generalize this transformation into a typeclass called a Functor.</p>
-<p>Functors are parameterized by f, which is a type of kind &quot;* -&gt; *&quot;.</p>
+<p>Functors are parameterized by f, which is also a type of kind &quot;* -&gt; *&quot;.</p>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="kw">Functor</span> f <span class="kw">where</span><br /><span class="ot">  fmap </span><span class="ot">::</span> <span class="kw">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b<br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> [] <span class="kw">where</span><br />  <span class="fu">fmap</span> _ [] <span class="fu">=</span> []<br />  <span class="fu">fmap</span> g (x<span class="fu">:</span>xs) <span class="fu">=</span> g x <span class="fu">:</span> <span class="fu">fmap</span> g xs</code></pre>
 <p>But why reimplement that? We can just assign the unapplied functions!</p>
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="kw">Functor</span> [] <span class="kw">where</span><br />  <span class="fu">fmap</span> <span class="fu">=</span> <span class="fu">map</span><br /><br /><span class="kw">instance</span> <span class="kw">Functor</span> <span class="dt">Tree</span> <span class="kw">where</span><br />  <span class="fu">fmap</span> <span class="fu">=</span> tmap</code></pre>
@@ -958,21 +1024,89 @@ Alex Burkhart
 <pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="kw">Functor</span> ((<span class="ot">-&gt;</span>) e) <span class="kw">where</span><br /><span class="ot">  fmap </span><span class="ot">::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> c)<br />  <span class="fu">fmap</span> <span class="fu">=</span> (<span class="fu">.</span>)</code></pre>
 </div>
 <div class="slide">
-<h1 id="functor-of-functions-trouble">Functor of Functions == Trouble</h1>
+<h1 id="lists-of-functions">Lists of Functions</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">fns </span><span class="ot">::</span> [(<span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span>)]<br />fns <span class="fu">=</span> <span class="fu">map</span> (<span class="fu">*</span>) [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]<br /><br /><span class="co">-- alternatively written:</span><br /><br /><span class="ot">fns </span><span class="ot">::</span> [(<span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span>)]<br />fns <span class="fu">=</span> [(<span class="fu">*</span><span class="dv">1</span>), (<span class="fu">*</span><span class="dv">2</span>), (<span class="fu">*</span><span class="dv">3</span>), (<span class="fu">*</span><span class="dv">4</span>), (<span class="fu">*</span><span class="dv">5</span>)]</code></pre>
+</div>
+<div class="slide">
+<h1 id="lists-of-functions-1">Lists of Functions</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">fns </span><span class="ot">::</span> [(<span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span>)]<br />fns <span class="fu">=</span> <span class="fu">map</span> (<span class="fu">*</span>) [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]</code></pre>
+<p>How do we get values back out of our container?</p>
+<pre class="sourceCode"><code class="sourceCode haskell">fns' <span class="fu">=</span> <span class="fu">fmap</span> (<span class="fu">fmap</span> (<span class="fu">+</span><span class="dv">3</span>)) fns<br /><br /><span class="fu">:</span>t fns'<br /><span class="ot">=&gt;</span> <span class="fu">?</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="lists-of-functions-2">Lists of Functions</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">fns </span><span class="ot">::</span> [(<span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span>)]<br />fns <span class="fu">=</span> <span class="fu">map</span> (<span class="fu">*</span>) [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]</code></pre>
+<p>How do we get values back out of our container?</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="ot">fns' </span><span class="ot">::</span> [(<span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span>)]<br />fns' <span class="fu">=</span> <span class="fu">fmap</span> <span class="fu">??????</span> fns</code></pre>
 </div>
 <div class="slide">
 <h1 id="applicative-functors">Applicative Functors</h1>
+<p>Yet another typeclass abstracting away a pattern you didn't realize existed!</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="kw">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Applicative</span> f <span class="kw">where</span><br /><span class="ot">  pure  </span><span class="ot">::</span> a <span class="ot">-&gt;</span> f a<br /><span class="ot">  (&lt;*&gt;) </span><span class="ot">::</span> f (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b<br /><span class="ot">  (*&gt;)  </span><span class="ot">::</span> f a <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b                     <span class="co">-- optional</span><br /><span class="ot">  (&lt;*)  </span><span class="ot">::</span> f a <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f a                     <span class="co">-- optional</span></code></pre>
+<p>(&lt;*&gt;) is pronounced &quot;apply&quot;.</p>
+<p>(<em>&gt;) Sequence actions, discarding the value of the first argument. (&lt;</em>) Sequence actions, discarding the value of the second argument.</p>
 </div>
 <div class="slide">
-<h1 id="applicative-functor-example-source">Applicative Functor Example Source</h1>
+<h1 id="applicative-functor-example">Applicative Functor Example</h1>
+<p>First qualification: Maybe is a functor. Check!</p>
+<p>Our Applicative Maybe will hold a function.</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Maybe</span> <span class="kw">where</span><br /><br /><span class="ot">  pure </span><span class="ot">::</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a<br />  pure <span class="fu">=</span> <span class="kw">Just</span><br /><br /><span class="ot">  (&lt;*&gt;) </span><span class="ot">::</span> <span class="dt">Maybe</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b<br />  <span class="kw">Nothing</span> <span class="fu">&lt;*&gt;</span> _ <span class="fu">=</span> <span class="kw">Nothing</span><br />  (<span class="kw">Just</span> f) <span class="fu">&lt;*&gt;</span> x <span class="fu">=</span> <span class="fu">fmap</span> f x</code></pre>
+<p>We get the other Applicative functions for free with the default typeclass implementation, but we'll ignore them for now.</p>
 </div>
 <div class="slide">
 <h1 id="usage-of-applicative-functors">Usage of Applicative Functors</h1>
+<p>Quiz Time!</p>
+<pre class="sourceCode"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pure (<span class="fu">*</span><span class="dv">10</span>)<br /><span class="ot">=&gt;</span> <span class="fu">?</span><br /><br />ghci<span class="fu">&gt;</span> pure (<span class="fu">*</span><span class="dv">10</span>) <span class="fu">&lt;*&gt;</span> <span class="kw">Just</span> <span class="dv">12</span><br /><span class="ot">=&gt;</span> <span class="fu">?</span><br /><br />ghci<span class="fu">&gt;</span> <span class="kw">Nothing</span> <span class="fu">&lt;*&gt;</span> <span class="kw">Just</span> <span class="dv">12</span><br /><span class="ot">=&gt;</span> <span class="fu">?</span><br /><br />ghci<span class="fu">&gt;</span> pure (<span class="fu">*</span><span class="dv">10</span>) <span class="fu">&lt;*&gt;</span> <span class="kw">Nothing</span><br /><span class="ot">=&gt;</span> <span class="fu">?</span><br /><br />ghci<span class="fu">&gt;</span> <span class="fu">:</span>t pure (<span class="fu">*</span>)<br /><span class="ot">=&gt;</span> <span class="fu">?</span></code></pre>
+</div>
+<div class="slide">
+<h1 id="applicative-laws">Applicative Laws</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="co">-- Identity</span><br />pure <span class="fu">id</span> <span class="fu">&lt;*&gt;</span> v <span class="fu">=</span> v<br /><br /><span class="co">-- Composition</span><br />pure (<span class="fu">.</span>) <span class="fu">&lt;*&gt;</span> u <span class="fu">&lt;*&gt;</span> v <span class="fu">&lt;*&gt;</span> w <span class="fu">=</span> u <span class="fu">&lt;*&gt;</span> (v <span class="fu">&lt;*&gt;</span> w)<br /><br /><span class="co">-- Homomorphism</span><br />pure f <span class="fu">&lt;*&gt;</span> pure x <span class="fu">=</span> pure (f x)<br /><br /><span class="co">-- Interchange</span><br />u <span class="fu">&lt;*&gt;</span> pure y <span class="fu">=</span> pure (<span class="fu">$</span> y) <span class="fu">&lt;*&gt;</span> u</code></pre>
+</div>
+<div class="slide">
+<h1 id="more-usage">More Usage</h1>
+<p>Helpfully, the Applicative package (Control.Applicative) defines an operator for our classic &quot;fmap&quot;: &lt;$&gt;</p>
+<pre class="sourceCode"><code class="sourceCode haskell">nums <span class="fu">=</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]<br /><br />fns <span class="fu">=</span> <span class="fu">fmap</span> (<span class="fu">*</span>) nums<br /><br />results <span class="fu">=</span> fns <span class="fu">&lt;*&gt;</span> [<span class="dv">10</span>]</code></pre>
+<p>or we could write:</p>
+<pre class="sourceCode"><code class="sourceCode haskell">results <span class="fu">=</span> (<span class="fu">*</span>) <span class="fu">&lt;$&gt;</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>] <span class="fu">&lt;*&gt;</span> pure <span class="dv">10</span></code></pre>
+<p>It looks funny now, but it grows on you. And you can start using it in awesome ways.</p>
+<p>See: Applicative Parsing.</p>
+</div>
+<div class="slide">
+<h1 id="monads">Monads</h1>
+<p>As Applicative Functors are more powerful than Functors, Monads are more powerful than Applicative Functors.</p>
+<p>As with Applicative Functors, Monads are parameterized by types of kind &quot;* -&gt; *&quot;</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="kw">Monad</span> m <span class="kw">where</span><br /><span class="ot">  return </span><span class="ot">::</span> a <span class="ot">-&gt;</span> m a<br /><span class="ot">  (&gt;&gt;=) </span><span class="ot">::</span> m a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> m b) <span class="ot">-&gt;</span> m b<br /><br /><span class="ot">  (&gt;&gt;) </span><span class="ot">::</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m b          <span class="co">-- optional, implemented by default</span></code></pre>
+<p>(&gt;&gt;=) is pronounced &quot;bind&quot;.</p>
+<p>As we'll find out, many types are also Monads.</p>
+<p>In fact, if it is a Monad, it is by necessity an Applicative Functor (and we could define pure and (&lt;*&gt;) in terms of (&gt;&gt;=) and return).</p>
+</div>
+<div class="slide">
+<h1 id="maybe-monad">Maybe Monad</h1>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">class</span> <span class="kw">Monad</span> m <span class="kw">where</span><br /><span class="ot">  return </span><span class="ot">::</span> a <span class="ot">-&gt;</span> m a<br /><span class="ot">  (&gt;&gt;=) </span><span class="ot">::</span> m a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> m b) <span class="ot">-&gt;</span> m b<br /><br /><span class="ot">  (&gt;&gt;) </span><span class="ot">::</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m b          <span class="co">-- optional, implemented by default</span></code></pre>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="kw">Monad</span> <span class="dt">Maybe</span> <span class="kw">where</span><br /><span class="ot">  return </span><span class="ot">::</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a<br />  <span class="fu">return</span> <span class="fu">=</span> <span class="kw">Just</span>            <span class="co">-- again?</span><br /><br /><span class="ot">  (&gt;&gt;=) </span><span class="ot">::</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b<br />  <span class="kw">Nothing</span> <span class="fu">&gt;&gt;=</span> _ <span class="fu">=</span> <span class="kw">Nothing</span><br />  (<span class="kw">Just</span> x) <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> <span class="kw">Just</span> <span class="fu">$</span> f x</code></pre>
+<p>Similar semantics to our Applicative functions with Maybe. Why is this cooler?</p>
+</div>
+<div class="slide">
+<h1 id="more-maybe-monad">More Maybe Monad</h1>
+<p>Let's see an example!</p>
+<p>Applicative Style:</p>
+<pre class="sourceCode"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">Just</span> (<span class="fu">+</span><span class="dv">3</span>) <span class="fu">&lt;*&gt;</span> <span class="kw">Just</span> <span class="dv">3</span><br /><span class="ot">=&gt;</span> <span class="kw">Just</span> <span class="dv">6</span><br /><br />ghci<span class="fu">&gt;</span> <span class="kw">Just</span> (<span class="fu">+</span><span class="dv">3</span>) <span class="fu">&lt;*&gt;</span> <span class="kw">Nothing</span><br /><span class="ot">=&gt;</span> <span class="kw">Nothing</span></code></pre>
+<p>Monadic Style:</p>
+<pre class="sourceCode"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">Just</span> <span class="dv">3</span> <span class="fu">&gt;&gt;=</span> (<span class="fu">return</span> <span class="fu">.</span> (<span class="fu">+</span><span class="dv">3</span>))</code></pre>
+<p>Hmm, sorta contrived example. Applicative looks better here.</p>
+</div>
+<div class="slide">
+<h1 id="i-cant-believe-we-made-it-this-far">I can't believe we made it this far</h1>
+<p>I'm kinda out of slides. But not out of material!</p>
+</div>
+<div class="slide">
+<h1 id="better-maybe-monad-example">Better Maybe Monad example</h1>
+<p>Let's say we have a simple database (<em>cough</em>association-list<em>cough</em>).</p>
+<pre class="sourceCode"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Database</span> <span class="fu">=</span> <span class="dt">Database</span> [(<span class="dt">String</span>, <span class="dt">String</span>)]<br /><br />db <span class="fu">=</span> <span class="dt">Database</span> [(<span class="st">&quot;Alice, &quot;</span><span class="dv">555</span><span class="fu">-</span><span class="dv">1234</span><span class="st">&quot;), (&quot;</span><span class="dt">Bob</span><span class="st">&quot;, &quot;</span><span class="dv">555</span><span class="fu">-</span><span class="dv">9876</span><span class="st">&quot;), (&quot;</span><span class="dt">Charlie</span><span class="st">&quot;, &quot;</span><span class="dv">555</span><span class="fu">-</span><span class="dv">3456</span><span class="st">&quot;)]</span><br /><br /><span class="st">getPhoneNumber :: Database -&gt; String -&gt; Maybe String</span><br /><span class="st">getPhoneNumber (Database []) _ = Nothing</span><br /><span class="st">getPhoneNumber (Database ( (name,number) :xs) target</span><br /><span class="st"> | target == name = Just number</span><br /><span class="st"> | otherwise = getPhoneNumber xs target</span></code></pre>
 </div>
 <div class="slide">
 <h1 id="future-topics">Future Topics</h1>
 <ul>
-<li>Monads</li>
 <li>Common Monads (I/O, Reader, Writer, State)</li>
 <li>MonadTransformers and MonadPlus</li>
 <li>Arrows</li>

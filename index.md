@@ -250,7 +250,7 @@ Just :: a -> Maybe a
 isRed :: Color -> Bool
 isRed c = if c == Red
           then True
-          else if c == Blue...
+          else False
 ~~~~
 
 ~~~~ {.haskell}
@@ -1003,6 +1003,153 @@ Kinds are useful when thinking about higher order types.
 
 # Part 7: Cool Abstractions
 
+# Introduction to Abstraction
+
+So let's review a couple of terms from Math class:
+
+* **binary operation**: a function which takes two arguments. let's call it *.
+
+* **identity**: an element, I, where I * a === a, or "Does not change our result"
+
+* **associativity**: a * (b * c) === (a * b) * c, or "Order Applied"
+
+* **commutativity**: a * b === b * a, or "Argument Order"
+
+Why do you care?
+
+# Monoids
+
+First of the simple Haskell typeclasses named after scary Math stuff.
+
+Almost stupidly simple.
+
+~~~~ {.haskell}
+class Monoid a where
+  mempty :: a                 -- identity
+  mappend :: a -> a -> a      -- an associative binary op
+~~~~
+
+So many types from all programming languages are Monoids. You just
+didn't know it.
+
+* Lists under concatenation (++)
+* Numbers under Addition or Multiplication (+), (*)
+* Booleans under Conjunction or Disjunction (all, any)
+* Sets under Union or Intersection (||, &&)
+* Functions from a type to itself, under Composition (.)
+
+# Monoids
+
+Monoid's type parameter, m, is a type of kind "*" (a fully applied type).
+
+~~~~ {.haskell}
+class Monoid m where
+  mempty :: m                 -- identity
+  mappend :: m -> m -> m      -- an associative binary op
+  mconcat :: [m] -> m         -- optional, can be defined entirely in
+                              -- terms of mappend otherwise
+~~~~
+
+Why do we care?
+
+This is a pattern you see across many things since so many things
+"qualify" as a Monoid.
+
+# Monoids
+
+~~~~ {.haskell}
+class Monoid m where
+  mempty :: m                 -- identity
+  mappend :: m -> m -> m      -- an associative binary op
+  mconcat :: [m] -> m         -- optional, can be defined entirely in
+                              -- terms of mappend otherwise
+~~~~
+
+~~~~ {.haskell}
+instance Monoid [] where
+  mempty :: []
+  mempty = []
+
+  mappend :: m -> m -> m
+  mappend = (++)
+
+  mconcat :: [m] -> m
+  mconcat = foldr mappend mempty
+~~~~
+
+# Monoid Laws
+
+We can actually express the qualities of Monoids in Haskell notation,
+which we can then test later using QuickCheck.
+
+~~~~ {.haskell}
+-- check the identity property of mempty
+leftIdentity :: a -> Bool
+leftIdentity x = mempty `mappend` x == x
+
+rightIdentity :: a -> Bool
+rightIdentity x = x `mappend` mempty = x
+
+-- check associativity of mappend
+associativity :: a -> a -> a -> Bool
+associativity x y z = (x `mappend` y) `mappend` z == x `mappend` (y `mappend` z)
+~~~~
+
+That's it!
+
+# Numbers
+
+So Numbers are Monoids with using both the Addition and Multiplication
+operations.
+
+We can separate these by wrapping your number in a newtype wrapper.
+
+~~~~ {.haskell}
+newtype Sum a = Sum { getSum :: a }
+
+newtype Product a = Product { getProduct :: a }
+~~~~
+
+We can then separately define Monoid instances for each of these
+newtypes.
+
+~~~~ {.haskell}
+instance (Num a ) => (Monoid Sum) where
+  mempty = Sum 0
+  mappend (Sum x) (Sum y) = Sum $ x + y
+
+instance (Num a ) => Monoid (Product a) where
+  mempty = Sum 1
+  mappend (Product x) (Product y) = Product $ x * y
+~~~~
+
+We can do the same thing for Bool's using newtype wrappers Any and All
+for set conjunction and disjunction.
+
+# Monoid Recap
+
+The simplest of the (very) abstract type classes.
+
+Usefulness? fold* can be defined in terms of "mempty" and "mappend".
+
+~~~~ {.haskell}
+foldl :: (Monoid a) => (a -> a -> a) -> a -> [a] -> a
+~~~~
+
+Very few requirements, all sorts of types are Monoids.
+
+Can be extended in usefulness by defining CommutativeMonoids, which
+requires commutativity of the type, where the result changes when
+changing the argument order.
+
+Commutative Monoids:
+
+* Lists
+
+* Functions
+
+* Matrices
+
 # Generalizing Map
 
 Map takes a function and a "container", apply that function to the
@@ -1061,7 +1208,7 @@ setting.***
 
 Generalize this transformation into a typeclass called a Functor.
 
-Functors are parameterized by f, which is a type of kind "* -> *".
+Functors are parameterized by f, which is also a type of kind "* -> *".
 
 ~~~~ {.haskell}
 class Functor f where
@@ -1210,17 +1357,238 @@ instance Functor ((->) e) where
   fmap = (.)
 ~~~~
 
-# Functor of Functions == Trouble
+# Lists of Functions
+
+~~~~ {.haskell}
+fns :: [(Integer -> Integer)]
+fns = map (*) [1..5]
+
+-- alternatively written:
+
+fns :: [(Integer -> Integer)]
+fns = [(*1), (*2), (*3), (*4), (*5)]
+~~~~
+
+# Lists of Functions
+
+~~~~ {.haskell}
+fns :: [(Integer -> Integer)]
+fns = map (*) [1..5]
+~~~~
+
+How do we get values back out of our container?
+
+~~~~ {.haskell}
+fns' = fmap (fmap (+3)) fns
+
+:t fns'
+=> ?
+~~~~
+
+# Lists of Functions
+
+~~~~ {.haskell}
+fns :: [(Integer -> Integer)]
+fns = map (*) [1..5]
+~~~~
+
+How do we get values back out of our container?
+
+~~~~ {.haskell}
+fns' :: [(Integer -> Integer)]
+fns' = fmap ?????? fns
+~~~~
 
 # Applicative Functors
 
-# Applicative Functor Example Source
+Yet another typeclass abstracting away a pattern you didn't realize
+existed!
+
+~~~~ {.haskell}
+class Functor f => Applicative f where
+  pure  :: a -> f a
+  (<*>) :: f (a -> b) -> f a -> f b
+  (*>)  :: f a -> f a -> f b                     -- optional
+  (<*)  :: f a -> f a -> f a                     -- optional
+~~~~
+
+(<*>) is pronounced "apply".
+
+(*>) Sequence actions, discarding the value of the first argument.
+(<*) Sequence actions, discarding the value of the second argument.
+
+# Applicative Functor Example
+
+First qualification: Maybe is a functor. Check!
+
+Our Applicative Maybe will hold a function.
+
+~~~~ {.haskell}
+instance Applicative Maybe where
+
+  pure :: a -> Maybe a
+  pure = Just
+
+  (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+  Nothing <*> _ = Nothing
+  (Just f) <*> x = fmap f x
+~~~~
+
+We get the other Applicative functions for free with the default
+typeclass implementation, but we'll ignore them for now.
 
 # Usage of Applicative Functors
 
+Quiz Time!
+
+~~~~ {.haskell}
+ghci> pure (*10)
+=> ?
+
+ghci> pure (*10) <*> Just 12
+=> ?
+
+ghci> Nothing <*> Just 12
+=> ?
+
+ghci> pure (*10) <*> Nothing
+=> ?
+
+ghci> :t pure (*)
+=> ?
+~~~~
+
+# Applicative Laws
+
+~~~~ {.haskell}
+-- Identity
+pure id <*> v = v
+
+-- Composition
+pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+
+-- Homomorphism
+pure f <*> pure x = pure (f x)
+
+-- Interchange
+u <*> pure y = pure ($ y) <*> u
+~~~~
+
+# More Usage
+
+Helpfully, the Applicative package (Control.Applicative) defines an
+operator for our classic "fmap": <$>
+
+~~~~ {.haskell}
+nums = [1..10]
+
+fns = fmap (*) nums
+
+results = fns <*> [10]
+~~~~
+
+or we could write:
+
+~~~~ {.haskell}
+results = (*) <$> [1..10] <*> pure 10
+~~~~
+
+It looks funny now, but it grows on you. And you can start using it in
+awesome ways.
+
+See: Applicative Parsing.
+
+# Monads
+
+As Applicative Functors are more powerful than Functors, Monads are
+more powerful than Applicative Functors.
+
+As with Applicative Functors, Monads are parameterized by types of
+kind "* -> *"
+
+~~~~ {.haskell}
+class Monad m where
+  return :: a -> m a
+  (>>=) :: m a -> (a -> m b) -> m b
+
+  (>>) :: m a -> m b -> m b          -- optional, implemented by default
+~~~~
+
+(>>=) is pronounced "bind".
+
+As we'll find out, many types are also Monads.
+
+In fact, if it is a Monad, it is by necessity an Applicative Functor
+(and we could define pure and (<*>) in terms of (>>=) and return).
+
+# Maybe Monad
+
+~~~~ {.haskell}
+class Monad m where
+  return :: a -> m a
+  (>>=) :: m a -> (a -> m b) -> m b
+
+  (>>) :: m a -> m b -> m b          -- optional, implemented by default
+~~~~
+
+~~~~ {.haskell}
+instance Monad Maybe where
+  return :: a -> Maybe a
+  return = Just            -- again?
+
+  (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+  Nothing >>= _ = Nothing
+  (Just x) >>= f = Just $ f x
+~~~~
+
+Similar semantics to our Applicative functions with Maybe. Why is this
+cooler?
+
+# More Maybe Monad
+
+Let's see an example!
+
+Applicative Style:
+
+~~~~ {.haskell}
+ghci> Just (+3) <*> Just 3
+=> Just 6
+
+ghci> Just (+3) <*> Nothing
+=> Nothing
+~~~~
+
+Monadic Style:
+
+~~~~ {.haskell}
+ghci> Just 3 >>= (return . (+3))
+~~~~
+
+Hmm, sorta contrived example. Applicative looks better here.
+
+
+# I can't believe we made it this far
+
+I'm kinda out of slides. But not out of material!
+
+# Better Maybe Monad example
+
+Let's say we have a simple database (*cough*association-list*cough*).
+
+~~~~ {.haskell}
+newtype Database = Database [(String, String)]
+
+db = Database [("Alice, "555-1234"), ("Bob", "555-9876"), ("Charlie", "555-3456")]
+
+getPhoneNumber :: Database -> String -> Maybe String
+getPhoneNumber (Database []) _ = Nothing
+getPhoneNumber (Database ( (name,number) :xs) target
+ | target == name = Just number
+ | otherwise = getPhoneNumber xs target
+~~~~
+
 # Future Topics
 
-- Monads
 - Common Monads (I/O, Reader, Writer, State)
 - MonadTransformers and MonadPlus
 - Arrows
